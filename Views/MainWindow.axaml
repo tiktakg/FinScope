@@ -1,0 +1,155 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:FinScope.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:v="clr-namespace:FinScope.Views"
+        mc:Ignorable="d"
+        d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="FinScope.Views.MainWindow"
+        x:CompileBindings="False"
+        x:DataType="vm:MainWindowViewModel"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="FinScope"
+        Width="1200" Height="800"
+        MinWidth="1024" MinHeight="768">
+
+	<Window.Styles>
+		<!-- Общие стили (как в LoginView) -->
+		<Style Selector="TextBlock">
+			<Setter Property="Foreground" Value="#FFE0E0E0"/>
+		</Style>
+
+		<Style Selector="Button">
+			<Setter Property="CornerRadius" Value="4"/>
+			<Setter Property="Padding" Value="12 6"/>
+		</Style>
+
+		<!-- Стили кнопок навигации -->
+		<Style Selector="Button.NavButton">
+			<Setter Property="Background" Value="Transparent"/>
+			<Setter Property="BorderBrush" Value="Transparent"/>
+			<Setter Property="Foreground" Value="#FFE0E0E0"/>
+			<Setter Property="HorizontalAlignment" Value="Left"/>
+			<Setter Property="HorizontalContentAlignment" Value="Left"/>
+			<Setter Property="Padding" Value="15,10"/>
+			<Setter Property="FontSize" Value="14"/>
+		</Style>
+
+		<Style Selector="Button.NavButton:pointerover">
+			<Setter Property="Background" Value="#FF333333"/>
+			<Setter Property="Foreground" Value="{DynamicResource SystemAccentColorBrush}"/>
+		</Style>
+
+		<Style Selector="Button.NavButton:selected">
+			<Setter Property="Background" Value="#FF333333"/>
+			<Setter Property="Foreground" Value="{DynamicResource SystemAccentColorBrush}"/>
+			<Setter Property="BorderBrush" Value="{DynamicResource SystemAccentColorBrush}"/>
+			<Setter Property="BorderThickness" Value="0 0 0 2"/>
+		</Style>
+
+		<Style Selector="Button.RefreshButton">
+			<Setter Property="Background" Value="#FF4F9FEE"/>
+			<Setter Property="Foreground" Value="White"/>
+			<Setter Property="Padding" Value="10,5"/>
+			<Setter Property="CornerRadius" Value="4"/>
+		</Style>
+
+		<Style Selector="Button.RefreshButton:pointerover">
+			<Setter Property="Background" Value="#FF6BB5FF"/>
+		</Style>
+
+		<!-- Стиль для области контента -->
+		<Style Selector="ContentControl#MainContent">
+			<Setter Property="Background" Value="#FF1A1A1A"/>
+		</Style>
+	</Window.Styles>
+
+	<DockPanel>
+		<!-- Боковое меню -->
+		<Border DockPanel.Dock="Left"
+                Width="220"
+                Background="#FF252525"
+                BorderBrush="#FF404040"
+                BorderThickness="0 0 1 0">
+			<Grid RowDefinitions="Auto,*,Auto">
+				<!-- Логотип -->
+				<StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="10" Margin="20,25">
+					<Image Source="/Assets/avalonia-logo.ico" Width="32" Height="32"/>
+					<TextBlock Text="FinScope"
+                               FontSize="20"
+                               FontWeight="Bold"
+                               Foreground="{DynamicResource SystemAccentColorBrush}"
+                               VerticalAlignment="Center"/>
+				</StackPanel>
+
+				<!-- Навигация -->
+				<ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+					<StackPanel Spacing="5" Margin="10,0">
+						<Button Command="{Binding NavigateToDashboardCommand}"
+                                Content="Главная"
+                                Classes="NavButton"/>
+
+						<Button Command="{Binding NavigateToMarketOverviewCommand}"
+                                Content="Рынок"
+                                Classes="NavButton"/>
+
+						<Button Command="{Binding NavigateToPortfolioCommand}"
+                                Content="Портфель"
+                                Classes="NavButton"/>
+
+						<Button Command="{Binding NavigateToTransactionsCommand}"
+                                Content="Транзакции"
+                                Classes="NavButton"/>
+
+						<Button Command="{Binding NavigateToWatchlistCommand}"
+                                Content="Отслеживаемые"
+                                Classes="NavButton"/>
+
+						<Button Command="{Binding NavigateToNewsCommand}"
+                                Content="Новости"
+                                Classes="NavButton"/>
+					</StackPanel>
+				</ScrollViewer>
+
+				<!-- Нижняя часть меню -->
+				<StackPanel Grid.Row="2" Spacing="5" Margin="10,0,10,20">
+					<Button Command="{Binding NavigateToSettingsCommand}"
+                            Content="Настройки"
+                            Classes="NavButton"/>
+
+					<Button Command="{Binding LogoutCommand}"
+                            Content="Выход"
+                            Classes="NavButton"
+                            Margin="0,15,0,0"/>
+				</StackPanel>
+			</Grid>
+		</Border>
+
+		<!-- Основной контент -->
+		<Grid>
+			<!-- Верхняя панель (изначально скрыта) -->
+			<Border x:Name="TopBar"
+                    DockPanel.Dock="Top"
+                    Height="50"
+                    Background="#FF252525"
+                    BorderBrush="#FF404040"
+                    BorderThickness="0 0 0 1"
+                    IsVisible="{Binding IsAuthenticated}">
+				<!-- ... (ваша существующая верхняя панель) ... -->
+			</Border>
+
+			<!-- Область контента -->
+			<ContentControl Content="{Binding CurrentView}">
+				<ContentControl.ContentTemplate>
+					<DataTemplate>
+						<!-- Вариант 1: Простое отображение CurrentView -->
+						<ContentPresenter Content="{Binding}"/>
+
+						
+					</DataTemplate>
+				</ContentControl.ContentTemplate>
+			</ContentControl>
+		</Grid>
+	</DockPanel>
+</Window>

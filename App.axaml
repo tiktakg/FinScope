@@ -1,0 +1,17 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="FinScope.App"
+             xmlns:local="using:FinScope"
+             RequestedThemeVariant="Dark">
+
+	<Application.DataTemplates>
+		<local:ViewLocator/>
+	</Application.DataTemplates>
+
+	<Application.Styles>
+		<!-- Основная тема -->
+		<FluentTheme  />
+
+	</Application.Styles>
+
+</Application>
