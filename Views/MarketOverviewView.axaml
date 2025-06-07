@@ -1,0 +1,123 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:FinScope.ViewModels"
+             mc:Ignorable="d"
+             x:Class="FinScope.MarketOverviewView"
+             x:DataType="vm:MarketOverviewViewModel"
+        x:CompileBindings="False"
+			 
+             d:DesignWidth="1200" d:DesignHeight="800">
+    <UserControl.Styles>
+        <!-- Наследуем стили из MainWindow -->
+        <Style Selector="TextBlock.header">
+            <Setter Property="FontSize" Value="24"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Margin" Value="0 0 15 0"/>
+            <Setter Property="Foreground" Value="{DynamicResource SystemAccentColorBrush}"/>
+        </Style>
+        
+        <Style Selector="Border.card">
+            <Setter Property="Background" Value="#FF252525"/>
+            <Setter Property="BorderBrush" Value="#FF404040"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="15"/>
+            <Setter Property="Margin" Value="10"/>
+        </Style>
+        
+        <Style Selector="DataGrid">
+            <Setter Property="Background" Value="#FF252525"/>
+            <Setter Property="BorderBrush" Value="#FF404040"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="8"/>
+        </Style>
+        
+        <Style Selector="DataGridColumnHeader">
+            <Setter Property="Background" Value="#FF333333"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+        </Style>
+		
+    </UserControl.Styles>
+
+    <ScrollViewer>
+        <StackPanel Margin="20">
+            <!-- Заголовок и фильтры -->
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch">
+                <TextBlock Text="Обзор рынка" Classes="header"/>
+                
+                <ComboBox ItemsSource="{Binding MarketSectors}" 
+                          SelectedItem="{Binding SelectedSector}"
+                          Width="200" Margin="10 0"
+                          PlaceholderText="Все сектора"/>
+                
+                <TextBox Watermark="Поиск по названию или тикеру..."
+                         Text="{Binding SearchQuery, Mode=TwoWay}"
+                         Width="300" Margin="10 0"/>
+            </StackPanel>
+            
+            <!-- Основные индексы -->
+            <WrapPanel Margin="0 20">
+                <Border Classes="card" Width="220">
+                    <StackPanel>
+                        <TextBlock Text="SP 500" FontSize="16"/>
+                        <TextBlock Text="{Binding SP500.Value, StringFormat='{}{0:N2}'}" 
+                                   FontSize="22" Margin="0 5"/>
+                        <TextBlock Text="{Binding SP500.ChangePercent, StringFormat='{}{0:+0.00;-0.00;0.00}%'}" 
+                                   Foreground="{Binding SP500.ChangeColor}"/>
+                    </StackPanel>
+                </Border>
+                
+                <Border Classes="card" Width="220">
+                    <StackPanel>
+                        <TextBlock Text="NASDAQ" FontSize="16"/>
+                        <TextBlock Text="{Binding Nasdaq.Value, StringFormat='{}{0:N2}'}" 
+                                   FontSize="22" Margin="0 5"/>
+                        <TextBlock Text="{Binding Nasdaq.ChangePercent, StringFormat='{}{0:+0.00;-0.00;0.00}%'}" 
+                                   Foreground="{Binding Nasdaq.ChangeColor}"/>
+                    </StackPanel>
+                </Border>
+                
+                <Border Classes="card" Width="220">
+                    <StackPanel>
+                        <TextBlock Text="Dow Jones" FontSize="16"/>
+                        <TextBlock Text="{Binding DowJones.Value, StringFormat='{}{0:N2}'}" 
+                                   FontSize="22" Margin="0 5"/>
+                        <TextBlock Text="{Binding DowJones.ChangePercent, StringFormat='{}{0:+0.00;-0.00;0.00}%'}" 
+                                   Foreground="{Binding DowJones.ChangeColor}"/>
+                    </StackPanel>
+                </Border>
+            </WrapPanel>
+
+			<TextBlock Text="{Binding FilteredStocks.Count, StringFormat='Всего акций: {0}'}"
+           Foreground="Red" FontSize="16"/>
+            <!-- Таблица акций -->
+            <Border Classes="card" Margin="0 50">
+                <DataGrid ItemsSource="{Binding FilteredStocks}" 
+                          AutoGenerateColumns="False"
+                          IsReadOnly="True"
+                          GridLinesVisibility="None">
+					<DataGrid.Columns>
+						<DataGridTextColumn Header="Тикер" Binding="{Binding Symbol}" Width="100"/>
+						<DataGridTextColumn Header="Компания" Binding="{Binding CompanyName}" Width="*"/>
+						<DataGridTextColumn Header="Цена" Binding="{Binding Price, StringFormat='{}{0:C2}'}" Width="120"/>
+						<DataGridTextColumn Header="Изменение"
+						   Binding="{Binding Change, StringFormat='{}{0:+0.00;-0.00;0.00}'}"
+						   Width="120"/>
+						<DataGridTextColumn Header="%"
+										   Binding="{Binding ChangePercent, StringFormat='{}{0:+0.00;-0.00;0.00}%'}"
+										   Width="100"/>
+						<DataGridTextColumn Header="Объем"
+										   Binding="{Binding Volume, StringFormat='{}{0:N0}'}"
+										   Width="120"/>
+						<DataGridTextColumn Header="Сектор"
+										   Binding="{Binding Sector}"
+										   Width="150"/>
+					</DataGrid.Columns>
+				</DataGrid>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

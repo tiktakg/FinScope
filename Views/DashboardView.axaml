@@ -2,7 +2,140 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="FinScope.DashboardView">
-  Welcome to Avalonia!
+             mc:Ignorable="d" 
+			 xmlns:vm="clr-namespace:FinScope.ViewModels"
+             xmlns:v="clr-namespace:FinScope.Views.Controls"
+             x:Class="FinScope.DashboardView"
+             x:DataType="vm:DashboardViewModel"
+             d:DesignWidth="1200" d:DesignHeight="800">
+	<UserControl.Styles>
+		<!-- Наследуем стили из MainWindow -->
+		<Style Selector="TextBlock.header">
+			<Setter Property="FontSize" Value="24"/>
+			<Setter Property="FontWeight" Value="Bold"/>
+			<Setter Property="Margin" Value="0 0 0 15"/>
+			<Setter Property="Foreground" Value="{DynamicResource SystemAccentColorBrush}"/>
+		</Style>
+
+		<Style Selector="Border.card">
+			<Setter Property="Background" Value="#FF252525"/>
+			<Setter Property="BorderBrush" Value="#FF404040"/>
+			<Setter Property="BorderThickness" Value="1"/>
+			<Setter Property="CornerRadius" Value="8"/>
+			<Setter Property="Padding" Value="15"/>
+			<Setter Property="Margin" Value="10"/>
+		</Style>
+
+		<Style Selector="TextBlock.value-text">
+			<Setter Property="FontSize" Value="28"/>
+			<Setter Property="Margin" Value="0 5 0 0"/>
+		</Style>
+	</UserControl.Styles>
+
+	<ScrollViewer>
+		<StackPanel Margin="20">
+			<!-- Заголовок -->
+			<TextBlock Text="Главная панель" Classes="header"/>
+
+			<!-- Первый ряд: Основные метрики -->
+			<WrapPanel>
+				<!-- Карточка баланса -->
+				<Border Classes="card" Width="300">
+					<StackPanel>
+						<TextBlock Text="Общий баланс" FontSize="16"/>
+						<TextBlock Text="{Binding PortfolioBalance, StringFormat='{}{0:C}'}"
+                                   Classes="value-text"
+                                   Foreground="{DynamicResource SystemAccentColorBrush}"/>
+						<TextBlock Text="{Binding BalanceChangePercent, StringFormat='{}{0:+0.00;-0.00;0.00}%'}"
+                                   Foreground="{Binding BalanceChangeColor}"/>
+					</StackPanel>
+				</Border>
+
+				<!-- Карточка доходности -->
+				<Border Classes="card" Width="300">
+					<StackPanel>
+						<TextBlock Text="Доходность" FontSize="16"/>
+						<TextBlock Text="{Binding TotalProfit, StringFormat='{}{0:C}'}"
+                                   Classes="value-text"
+                                   Foreground="{Binding ProfitColor}"/>
+						<TextBlock Text="{Binding ProfitPercent, StringFormat='{}{0:+0.00;-0.00;0.00}%'}"
+                                   Foreground="{Binding ProfitColor}"/>
+					</StackPanel>
+				</Border>
+			</WrapPanel>
+
+			<!-- Второй ряд: Графики и активы -->
+			<Grid Margin="0 20 0 0" ColumnDefinitions="*,*" RowDefinitions="Auto,Auto">
+				<!-- График портфеля -->
+				<Border Classes="card" Grid.Column="0" Grid.Row="0" Grid.RowSpan="2">
+					<StackPanel>
+						<TextBlock Text="Динамика портфеля" FontSize="16" Margin="0 0 0 10"/>
+						<!-- Здесь будет ChartControl -->
+						<TextBlock Text="[График будет здесь]" HorizontalAlignment="Center"/>
+					</StackPanel>
+				</Border>
+
+				<!-- Топ активов -->
+				<Border Classes="card" Grid.Column="1" Grid.Row="0">
+					<StackPanel>
+						<TextBlock Text="Топ активов" FontSize="16" Margin="0 0 0 10"/>
+						<ItemsControl ItemsSource="{Binding TopAssets}">
+							<ItemsControl.ItemTemplate>
+								<DataTemplate>
+									<Grid ColumnDefinitions="40*,30*,30*" Margin="0 5">
+										<TextBlock Text="{Binding Symbol}" Grid.Column="0"/>
+										<TextBlock Text="{Binding Value, StringFormat='{}{0:C}'}"
+                                                   Grid.Column="1" HorizontalAlignment="Right"/>
+										<TextBlock Text="{Binding ChangePercent, StringFormat='{}{0:+0.00;-0.00;0.00}%'}"
+                                                   Grid.Column="2" HorizontalAlignment="Right"
+                                                   Foreground="{Binding ChangeColor}"/>
+									</Grid>
+								</DataTemplate>
+							</ItemsControl.ItemTemplate>
+						</ItemsControl>
+					</StackPanel>
+				</Border>
+
+				<!-- Последние транзакции -->
+				<Border Classes="card" Grid.Column="1" Grid.Row="1">
+					<StackPanel>
+						<TextBlock Text="Последние операции" FontSize="16" Margin="0 0 0 10"/>
+						<ItemsControl ItemsSource="{Binding RecentTransactions}">
+							<ItemsControl.ItemTemplate>
+								<DataTemplate>
+									<Grid ColumnDefinitions="30*,25*,25*,20*" Margin="0 5">
+										<TextBlock Text="{Binding Date, StringFormat='{}{0:dd.MM.yy}'}" Grid.Column="0"/>
+										<TextBlock Text="{Binding Symbol}" Grid.Column="1"/>
+										<TextBlock Text="{Binding Type}" Grid.Column="2"/>
+										<TextBlock Text="{Binding Price, StringFormat='{}{0:C}'}"
+                                                   Grid.Column="3" HorizontalAlignment="Right"/>
+									</Grid>
+								</DataTemplate>
+							</ItemsControl.ItemTemplate>
+						</ItemsControl>
+					</StackPanel>
+				</Border>
+			</Grid>
+
+			<!-- Третий ряд: Новости рынка -->
+			<Border Classes="card" Margin="0 20 0 0">
+				<StackPanel>
+					<TextBlock Text="Финансовые новости" FontSize="16" Margin="0 0 0 10"/>
+					<ItemsControl ItemsSource="{Binding MarketNews}">
+						<ItemsControl.ItemTemplate>
+							<DataTemplate>
+								<Border Margin="0 0 0 10" Padding="10" Background="#FF333333" CornerRadius="4">
+									<StackPanel>
+										<TextBlock Text="{Binding Title}" FontWeight="Bold"/>
+										<TextBlock Text="{Binding Source}" FontSize="12" Foreground="#FFA0A0A0"/>
+										<TextBlock Text="{Binding Summary}" TextWrapping="Wrap" Margin="0 5 0 0"/>
+									</StackPanel>
+								</Border>
+							</DataTemplate>
+						</ItemsControl.ItemTemplate>
+					</ItemsControl>
+				</StackPanel>
+			</Border>
+		</StackPanel>
+	</ScrollViewer>
 </UserControl>

@@ -102,10 +102,6 @@
                                 Content="Транзакции"
                                 Classes="NavButton"/>
 
-						<Button Command="{Binding NavigateToWatchlistCommand}"
-                                Content="Отслеживаемые"
-                                Classes="NavButton"/>
-
 						<Button Command="{Binding NavigateToNewsCommand}"
                                 Content="Новости"
                                 Classes="NavButton"/>
@@ -143,9 +139,7 @@
 			<ContentControl Content="{Binding CurrentView}">
 				<ContentControl.ContentTemplate>
 					<DataTemplate>
-						<!-- Вариант 1: Простое отображение CurrentView -->
 						<ContentPresenter Content="{Binding}"/>
-
 						
 					</DataTemplate>
 				</ContentControl.ContentTemplate>

@@ -6,12 +6,12 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace FinScope;
 
-public partial class DashboardView : UserControl
+public partial class MarketOverviewView : UserControl
 {
-    public DashboardView()
+    public MarketOverviewView()
     {
         InitializeComponent();
-        DataContext = ((App)Application.Current).Services.GetRequiredService<DashboardViewModel>();
+        DataContext = ((App)Application.Current).Services.GetRequiredService<MarketOverviewViewModel>();
 
     }
 }

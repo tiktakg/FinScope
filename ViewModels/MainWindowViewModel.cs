@@ -15,8 +15,7 @@ namespace FinScope.ViewModels
         [ObservableProperty]
         private bool _isAuthenticated;
 
-        [ObservableProperty]
-        private bool _showLoginView = true;
+     
 
         [ObservableProperty]
         private object _currentView;
@@ -33,37 +32,34 @@ namespace FinScope.ViewModels
 
         // ViewModels для каждого View
         public LoginViewModel LoginViewModel { get; }
-        //public DashboardViewModel DashboardViewModel { get; }
-        //public MarketOverviewViewModel MarketOverviewViewModel { get; }
+        public DashboardViewModel DashboardViewModel { get; }
+        public MarketOverviewViewModel MarketOverviewViewModel { get; }
         //public StockDetailViewModel StockDetailViewModel { get; }
-        //public PortfolioViewModel PortfolioViewModel { get; }
-        //public TransactionsViewModel TransactionsViewModel { get; }
-        //public WatchlistViewModel WatchlistViewModel { get; }
-        //public NewsFeedViewModel NewsFeedViewModel { get; }
+        public PortfolioViewModel PortfolioViewModel { get; }
+        public TransactionsViewModel TransactionsViewModel { get; }
+        public NewsViewModel NewsViewModel { get; }
         //public SettingsViewModel SettingsViewModel { get; }
 
         public MainWindowViewModel(
             INavigationService navigationService,
-            LoginViewModel loginViewModel
-            //DashboardViewModel dashboardViewModel,
-            //MarketOverviewViewModel marketOverviewViewModel,
+            LoginViewModel loginViewModel,
+            DashboardViewModel dashboardViewModel,
+            MarketOverviewViewModel marketOverviewViewModel,
             //StockDetailViewModel stockDetailViewModel,
-            //PortfolioViewModel portfolioViewModel,
-            //TransactionsViewModel transactionsViewModel,
-            //WatchlistViewModel watchlistViewModel,
-            //NewsFeedViewModel newsFeedViewModel,
+            PortfolioViewModel portfolioViewModel,
+            TransactionsViewModel transactionsViewModel,
+            NewsViewModel newsViewModel
             //SettingsViewModel settingsViewModel
             )
         {
             _navigationService = navigationService;
             LoginViewModel = loginViewModel;
-            //DashboardViewModel = dashboardViewModel;
-            //MarketOverviewViewModel = marketOverviewViewModel;
+            DashboardViewModel = dashboardViewModel;
+            MarketOverviewViewModel = marketOverviewViewModel;
             //StockDetailViewModel = stockDetailViewModel;
-            //PortfolioViewModel = portfolioViewModel;
-            //TransactionsViewModel = transactionsViewModel;
-            //WatchlistViewModel = watchlistViewModel;
-            //NewsFeedViewModel = newsFeedViewModel;
+            PortfolioViewModel = portfolioViewModel;
+            TransactionsViewModel = transactionsViewModel;
+            NewsViewModel = newsViewModel;
             //SettingsViewModel = settingsViewModel;
 
             // Подписка на событие успешной авторизации
@@ -76,80 +72,62 @@ namespace FinScope.ViewModels
         private void OnLoginSuccess(object sender, EventArgs e)
         {
             IsAuthenticated = true;
-            ShowLoginView = false;
-            //NavigateToDashboard();
+            NavigateToDashboard();
         }
 
         #region Navigation Commands
 
-        //[RelayCommand]
-        //private void NavigateToDashboard()
-        //{
-        //    CurrentView = new DashboardView { DataContext = DashboardViewModel };
-        //    UpdateVisibilityFlags(nameof(IsDashboardVisible));
-        //}
+      
 
-        //[RelayCommand]
-        //private void NavigateToMarketOverview()
-        //{
-        //    CurrentView = new MarketOverviewView { DataContext = MarketOverviewViewModel };
-        //    UpdateVisibilityFlags(nameof(IsMarketOverviewVisible));
-        //}
+        [RelayCommand]
+        private void NavigateToDashboard()
+        {
+            CurrentView = new DashboardView();
+        }
 
-        //[RelayCommand]
-        //private void NavigateToStockDetail()
-        //{
-        //    CurrentView = new StockDetailView { DataContext = StockDetailViewModel };
-        //    UpdateVisibilityFlags(nameof(IsStockDetailVisible));
-        //}
 
-        //[RelayCommand]
-        //private void NavigateToPortfolio()
-        //{
-        //    CurrentView = new PortfolioView { DataContext = PortfolioViewModel };
-        //    UpdateVisibilityFlags(nameof(IsPortfolioVisible));
-        //}
+        [RelayCommand]
+        private void NavigateToMarketOverview()
+        {
+            CurrentView = new MarketOverviewView();
+        }
 
-        //[RelayCommand]
-        //private void NavigateToTransactions()
-        //{
-        //    CurrentView = new TransactionsView { DataContext = TransactionsViewModel };
-        //    UpdateVisibilityFlags(nameof(IsTransactionsVisible));
-        //}
+        [RelayCommand]
+        private void NavigateToPortfolio()
+        {
+            CurrentView = new PortfolioView();
+        }
 
-        //[RelayCommand]
-        //private void NavigateToWatchlist()
-        //{
-        //    CurrentView = new WatchlistView { DataContext = WatchlistViewModel };
-        //    UpdateVisibilityFlags(nameof(IsWatchlistVisible));
-        //}
+        [RelayCommand]
+        private void NavigateToTransactions()
+        {
+            CurrentView = new TransactionsView();
+        }
 
-        //[RelayCommand]
-        //private void NavigateToNewsFeed()
-        //{
-        //    CurrentView = new NewsFeedView { DataContext = NewsFeedViewModel };
-        //    UpdateVisibilityFlags(nameof(IsNewsFeedVisible));
-        //}
+
+
+        [RelayCommand]
+        private void NavigateToNews()
+        {
+            CurrentView = new NewsView();
+        }
 
         //[RelayCommand]
         //private void NavigateToSettings()
         //{
-        //    CurrentView = new SettingsView { DataContext = SettingsViewModel };
-        //    UpdateVisibilityFlags(nameof(IsSettingsVisible));
+        //    CurrentView = new SettingsView();
         //}
 
         [RelayCommand]
         private void Logout()
         {
             IsAuthenticated = false;
-            ShowLoginView = true;
-            CurrentView = new LoginView { DataContext = LoginViewModel };
-            ResetAllVisibilityFlags();
+            CurrentView = new LoginView();
         }
 
         #endregion
 
-        #region Helper Methods
+    #region Helper Methods
 
         private void UpdateVisibilityFlags(string activeFlag)
         {

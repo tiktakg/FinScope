@@ -33,11 +33,18 @@ namespace FinScope.ViewModels
 
         public event EventHandler LoginSuccess;
 
-        public bool CanLogin => !string.IsNullOrWhiteSpace(Username) &&
-                              !string.IsNullOrWhiteSpace(Password) &&
-                              !HasErrors &&
-                              !IsLoading;
-
+        public bool CanLogin
+        {
+            get
+            {
+                var canLogin = !string.IsNullOrWhiteSpace(Username) &&
+                             !string.IsNullOrWhiteSpace(Password) &&
+                             !HasErrors &&
+                             !IsLoading;
+                Console.WriteLine($"CanLogin: {canLogin}");
+                return canLogin;
+            }
+            }
         private readonly IAuthService _authService;
         private readonly INavigationService _navigationService;
 
@@ -52,8 +59,8 @@ namespace FinScope.ViewModels
             ErrorsChanged += (s, e) => LoginCommand.NotifyCanExecuteChanged();
         }
 
-        [RelayCommand(CanExecute = nameof(CanLogin))]
-        private async Task Login()
+        [RelayCommand]
+        private void Login()
         {
             IsLoading = true;
             StatusMessage = "Выполняется вход...";
@@ -65,14 +72,14 @@ namespace FinScope.ViewModels
 
                 //if (result.IsSuccess)
                 //{
-                //    //await _navigationService.NavigateToAsync("//MainDashboard");
+                LoginSuccess?.Invoke(this, EventArgs.Empty);
+
                 //}
                 //else
                 //{
                 //    StatusMessage = result.ErrorMessage;
                 //}
 
-                LoginSuccess?.Invoke(this, EventArgs.Empty);
             }
             catch (Exception ex)
             {

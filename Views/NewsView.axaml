@@ -1,0 +1,51 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:FinScope.ViewModels"
+             mc:Ignorable="d"
+             x:Class="FinScope.NewsView"
+             x:DataType="vm:NewsViewModel"
+			 x:CompileBindings="False"
+             d:DesignWidth="1200" d:DesignHeight="800">
+
+	<UserControl.Styles>
+		<Style Selector="TextBlock.header">
+			<Setter Property="FontSize" Value="24"/>
+			<Setter Property="FontWeight" Value="Bold"/>
+			<Setter Property="Foreground" Value="{DynamicResource SystemAccentColorBrush}"/>
+		</Style>
+
+		<Style Selector="Border.card">
+			<Setter Property="Background" Value="#FF252525"/>
+			<Setter Property="CornerRadius" Value="10"/>
+			<Setter Property="Padding" Value="15"/>
+			<Setter Property="Margin" Value="0 0 0 15"/>
+		</Style>
+	</UserControl.Styles>
+
+	<ScrollViewer>
+		<StackPanel Margin="20">
+			<TextBlock Text="Финансовые новости" Classes="header" Margin="0 0 0 20"/>
+
+			<ItemsControl ItemsSource="{Binding News}">
+				<ItemsControl.ItemTemplate>
+					<DataTemplate>
+						<Border Classes="card">
+							<StackPanel>
+								<TextBlock Text="{Binding Headline}" FontWeight="Bold" FontSize="18" Margin="0 0 0 5"/>
+								<TextBlock Text="{Binding Source}" FontStyle="Italic" Foreground="Gray"/>
+								<TextBlock Text="{Binding Summary}" TextWrapping="Wrap" Margin="0 5 0 5"/>
+								<StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10">
+									<TextBlock Text="{Binding Datetime, StringFormat='{}{0:dd.MM.yyyy HH:mm}'}" Foreground="DarkGray"/>
+									<Button Content="Открыть" Command="{Binding DataContext.OpenNewsCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding Url}" />
+								</StackPanel>
+							</StackPanel>
+						</Border>
+					</DataTemplate>
+				</ItemsControl.ItemTemplate>
+			</ItemsControl>
+		</StackPanel>
+	</ScrollViewer>
+</UserControl>

@@ -127,7 +127,6 @@
 				<!-- Кнопка входа -->
 				<Button Content="Войти"
                         Command="{Binding LoginCommand}"
-                        IsEnabled="{Binding !IsLoading}"
                         HorizontalAlignment="Stretch"
                         Height="45"
                         FontSize="16"
