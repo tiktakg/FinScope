@@ -1,0 +1,82 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:oxy="clr-namespace:OxyPlot.Avalonia;assembly=OxyPlot.Avalonia"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:FinScope.ViewModels"
+             mc:Ignorable="d"
+             x:Class="FinScope.StockDetailView"
+             x:CompileBindings="False"
+			
+             x:DataType="vm:StockDetailViewModel"
+             d:DesignWidth="1000" d:DesignHeight="700">
+
+	<ScrollViewer>
+		<StackPanel Margin="20" Spacing="20">
+			<!-- Заголовок с названием компании и тикером -->
+			<TextBlock Text="{Binding Stock.CompanyName}" FontSize="26" FontWeight="Bold"/>
+			<TextBlock Text="{Binding Stock.Symbol}" FontSize="18" Foreground="Gray"/>
+
+			<!-- График свечей -->
+			<oxy:PlotView Model="{Binding CandlestickPlotModel}"  />
+
+			<!-- Основные показатели -->
+			<StackPanel Orientation="Horizontal" Spacing="40" Margin="0 20">
+				<StackPanel>
+					<TextBlock Text="Цена" FontWeight="Bold"/>
+					<TextBlock Text="{Binding Stock.Price, StringFormat='{}{0:C2}'}"/>
+				</StackPanel>
+
+				<StackPanel>
+					<TextBlock Text="Изменение" FontWeight="Bold"/>
+					<TextBlock Text="{Binding Stock.Change, StringFormat='{}{0:+0.00;-0.00;0.00}'}"
+                               Foreground="{Binding Stock.ChangeColor}"/>
+				</StackPanel>
+
+				<StackPanel>
+					<TextBlock Text="Объем" FontWeight="Bold"/>
+					<TextBlock Text="{Binding Stock.Volume, StringFormat='{}{0:N0}'}"/>
+				</StackPanel>
+			</StackPanel>
+
+			<!-- Информация по компании -->
+			<Border Classes="card">
+				<StackPanel>
+					<TextBlock Text="Информация о компании" FontWeight="Bold" FontSize="18" Margin="0 0 0 10"/>
+					<TextBlock Text="{Binding Stock.CompanyDescription}" TextWrapping="Wrap" />
+				</StackPanel>
+			</Border>
+
+			<!-- Новости -->
+			<Border Classes="card">
+				<StackPanel>
+					<TextBlock Text="Новости" FontWeight="Bold" FontSize="18" Margin="0 0 0 10"/>
+					<ItemsControl ItemsSource="{Binding News}">
+						<ItemsControl.ItemTemplate>
+							<DataTemplate>
+								<StackPanel Margin="0 5">
+									<TextBlock Text="{Binding Title}" FontWeight="Bold"/>
+									<TextBlock Text="{Binding PublishedAt, StringFormat='{}Дата: {0:dd.MM.yyyy}'}" FontSize="10" Foreground="Gray"/>
+									<TextBlock Text="{Binding Summary}" TextWrapping="Wrap"/>
+									<TextBlock Foreground="LightBlue" TextDecorations="Underline"
+										  Text="Читать полностью"
+										  Cursor="Hand"
+										  PointerPressed="OnReadMoreClicked"/>
+									
+								
+									<Separator Margin="0 5"/>
+								</StackPanel>
+							</DataTemplate>
+						</ItemsControl.ItemTemplate>
+					</ItemsControl>
+				</StackPanel>
+			</Border>
+
+			<!-- Кнопка добавить -->
+			<Button Content="Добавить в портфель"
+                    Width="200"
+                    HorizontalAlignment="Left"
+                    Command="{Binding AddToPortfolioCommand}"/>
+		</StackPanel>
+	</ScrollViewer>
+</UserControl>

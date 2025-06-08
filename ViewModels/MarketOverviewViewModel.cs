@@ -14,7 +14,11 @@ namespace FinScope.ViewModels
 {
     public partial class MarketOverviewViewModel : ObservableObject
     {
-        //private readonly IMarketDataService _marketDataService;
+        private readonly INavigationService _navigationService;
+        private readonly IMarketDataService _marketDataService;
+        public IAsyncRelayCommand LoadDataCommand { get; }
+
+        public ObservableCollection<Stock> MarketIndices { get; } = new ObservableCollection<Stock>();
 
         [ObservableProperty]
         private MarketIndex _sp500 = new() { Name = "S&P 500", Value = 4123.34m, Change = 12.45m, ChangePercent = 0.30m };
@@ -27,7 +31,7 @@ namespace FinScope.ViewModels
 
         [ObservableProperty]
         private ObservableCollection<Stock> _stocks = new();
-       
+
 
         [ObservableProperty]
         private ObservableCollection<string> _marketSectors = new();
@@ -38,120 +42,133 @@ namespace FinScope.ViewModels
         [ObservableProperty]
         private string _searchQuery;
 
-        public ObservableCollection<Stock> FilteredStocks =>
-          new ObservableCollection<Stock>(Stocks
-              .Where(s => string.IsNullOrEmpty(SelectedSector) || s.Sector == SelectedSector)
-              .Where(s => string.IsNullOrEmpty(SearchQuery) ||
-                          s.Symbol.Contains(SearchQuery, StringComparison.OrdinalIgnoreCase) ||
-                          s.CompanyName.Contains(SearchQuery, StringComparison.OrdinalIgnoreCase)));
+        [ObservableProperty]
+        private ObservableCollection<Stock> _filteredStocks = new();
+        [ObservableProperty]
+        private ObservableCollection<string> _sortOptions = new ObservableCollection<string>
+{
+    "Цена ↑",
+    "Цена ↓",
+    "Изменение ↑",
+    "Изменение ↓",
+    "Объем ↑",
+    "Объем ↓"
+};
+        [ObservableProperty]
+        private string _selectedSortOption;
 
-
-
-
-        public MarketOverviewViewModel(
-            //IMarketDataService marketDataService
-            )
+        private void UpdateFilteredStocks()
         {
-            //_marketDataService = marketDataService;
+            var filtered = Stocks
+                .Where(s => string.IsNullOrEmpty(SelectedSector) || s.Sector == SelectedSector)
+                .Where(s => string.IsNullOrEmpty(SearchQuery) ||
+                            s.Symbol.Contains(SearchQuery, StringComparison.OrdinalIgnoreCase) ||
+                            s.CompanyName.Contains(SearchQuery, StringComparison.OrdinalIgnoreCase));
+
+            // Сортировка
+            filtered = SelectedSortOption switch
+            {
+                "Цена ↑" => filtered.OrderBy(s => s.Price),
+                "Цена ↓" => filtered.OrderByDescending(s => s.Price),
+                "Изменение ↑" => filtered.OrderBy(s => s.ChangePercent),
+                "Изменение ↓" => filtered.OrderByDescending(s => s.ChangePercent),
+                "Объем ↑" => filtered.OrderBy(s => s.Volume),
+                "Объем ↓" => filtered.OrderByDescending(s => s.Volume),
+                _ => filtered
+            };
+
+            FilteredStocks = new ObservableCollection<Stock>(filtered);
+        }
+
+        public MarketOverviewViewModel(INavigationService navigationService
+            , IMarketDataService marketDataService)
+        {
+            _navigationService = navigationService;
+            _marketDataService = marketDataService;
 
             LoadDataCommand = new AsyncRelayCommand(LoadDataAsync);
             LoadDataCommand.Execute(null);
+        
 
-            // Реакция на изменение фильтров
+
             PropertyChanged += (s, e) =>
             {
-                if (e.PropertyName == nameof(SelectedSector)) 
+                if (e.PropertyName == nameof(SelectedSector) || e.PropertyName == nameof(SearchQuery) || e.PropertyName == nameof(SelectedSortOption))
+                {
+                    UpdateFilteredStocks();
                     OnPropertyChanged(nameof(FilteredStocks));
-                if (e.PropertyName == nameof(SearchQuery))
-                    OnPropertyChanged(nameof(FilteredStocks));
+                }
             };
-            Stocks.CollectionChanged += (s, e) => OnPropertyChanged(nameof(FilteredStocks));
+            Stocks.CollectionChanged += (s, e) =>
+            {
+                UpdateFilteredStocks();
+                OnPropertyChanged(nameof(FilteredStocks));
+            };
         }
 
-        public IAsyncRelayCommand LoadDataCommand { get; }
 
+        public async Task LoadMarketIndicesAsync()
+        {
+            var indices = await _marketDataService.GetMarketIndicesAsync();
+            MarketIndices.Clear();
+            foreach (var index in indices.Values)
+            {
+                MarketIndices.Add(index);
+            }
+        }
+
+        [RelayCommand]
+        private void ResetFilters()
+        {
+            SelectedSector = null;
+            SearchQuery = string.Empty;
+            SelectedSortOption = null;
+            UpdateFilteredStocks();
+        }
         private async Task LoadDataAsync()
         {
-            // Mock данные для тестирования
-            var mockStocks = new List<Stock>
-    {
-        new Stock {
-            Symbol = "AAPL",
-            CompanyName = "Apple Inc.",
-            Price = 175.32m,
-            Change = 1.45m,
-            ChangePercent = 0.83m,
-            Volume = 45_678_901,
-            Sector = "Technology"
-        },
-        new Stock {
-            Symbol = "MSFT",
-            CompanyName = "Microsoft Corporation",
-            Price = 310.98m,
-            Change = -2.34m,
-            ChangePercent = -0.75m,
-            Volume = 32_456_789,
-            Sector = "Technology"
-        },
-        new Stock {
-            Symbol = "GOOGL",
-            CompanyName = "Alphabet Inc.",
-            Price = 135.67m,
-            Change = 3.21m,
-            ChangePercent = 2.42m,
-            Volume = 12_345_678,
-            Sector = "Technology"
-        },
-        new Stock {
-            Symbol = "AMZN",
-            CompanyName = "Amazon.com Inc.",
-            Price = 115.45m,
-            Change = 0.89m,
-            ChangePercent = 0.78m,
-            Volume = 28_901_234,
-            Sector = "Consumer Cyclical"
-        },
-        new Stock {
-            Symbol = "TSLA",
-            CompanyName = "Tesla Inc.",
-            Price = 210.76m,
-            Change = -5.43m,
-            ChangePercent = -2.51m,
-            Volume = 50_123_456,
-            Sector = "Consumer Cyclical"
-        }
-     
-    };
-
-            Stocks = new ObservableCollection<Stock>(mockStocks);
-            // Получение уникальных секторов
+            var stockList = (await _marketDataService.GetTopStocksAsync());
+            Stocks = new ObservableCollection<Stock>(stockList);
             MarketSectors = new ObservableCollection<string>(
-                mockStocks.Select(s => s.Sector)
-                         .Distinct()
-                         .OrderBy(s => s));
+                stockList.Select(s => s.Sector).Distinct().OrderBy(s => s));
+
+            await LoadMarketIndicesAsync();
+            UpdateFilteredStocks();
             OnPropertyChanged(nameof(FilteredStocks));
         }
-    }
-}
-public class Stock : ObservableObject
-{
-    public string Symbol { get; set; }
-    public string CompanyName { get; set; }
-    public decimal Price { get; set; }
-    public decimal Change { get; set; }
-    public decimal ChangePercent { get; set; }
-    public long Volume { get; set; }
-    public int Quantity { get; set; }
+        [RelayCommand]
+        private async void ShowStockDetails(Stock stock)
+        {
+            if (stock == null)
+                return;
 
-    public string Sector { get; set; }
-    public string ChangeColor => ChangePercent >= 0 ? "#FF4CAF50" : "#FFF44336";
-}
-public class MarketIndex : ObservableObject
-{
-    public string Name { get; set; }
-    public decimal Value { get; set; }
-    public decimal Change { get; set; }
-    public decimal ChangePercent { get; set; }
-    public string ChangeColor => ChangePercent >= 0 ? "#FF4CAF50" : "#FFF44336";
+            _navigationService.NavigateToStockDetail(stock);
+
+
+        }
+    }
+    public class Stock : ObservableObject
+    {
+        public string Symbol { get; set; }
+        public string CompanyName { get; set; }
+        public decimal Price { get; set; }
+        public decimal Change { get; set; }
+        public decimal ChangePercent { get; set; }
+        public long Volume { get; set; }
+        public int Quantity { get; set; }
+
+        public string Sector { get; set; }
+        public string ChangeColor => ChangePercent >= 0 ? "#FF4CAF50" : "#FFF44336";
+    }
+    public class MarketIndex : ObservableObject
+    {
+        public string Name { get; set; }
+        public decimal Value { get; set; }
+        public decimal Change { get; set; }
+        public decimal ChangePercent { get; set; }
+        public string ChangeColor => ChangePercent >= 0 ? "#FF4CAF50" : "#FFF44336";
+    }
+
+
 }
 

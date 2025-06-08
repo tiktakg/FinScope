@@ -6,18 +6,21 @@ using System.Text;
 using System.Threading.Tasks;
 using FinScope.Interfaces;
 using FinScope.Views;
+using FinScope.ViewModels;
 
 namespace FinScope.Services
 {
     public class NavigationService : INavigationService
     {
         private Window _mainWindow;
+        private readonly Lazy<MainWindowViewModel> _mainViewModelLazy;
         private readonly Stack<UserControl> _navigationStack = new Stack<UserControl>();
-        private readonly IServiceProvider _serviceProvider;
+        private readonly IMarketDataService _marketDataService;
 
-        public NavigationService(IServiceProvider serviceProvider)
+        public NavigationService(IMarketDataService marketDataService, Lazy<MainWindowViewModel> mainViewModelLazy)
         {
-            _serviceProvider = serviceProvider;
+            _marketDataService = marketDataService;
+            _mainViewModelLazy = mainViewModelLazy;
         }
 
         public void SetMainWindow(Window mainWindow)
@@ -29,13 +32,22 @@ namespace FinScope.Services
             _navigationStack.Push(view);
             SetContent(view);
         }
-
+        public void NavigateToStockDetail(Stock stock)
+        {
+            var vm = new StockDetailViewModel(_marketDataService, stock);
+            var view = new StockDetailView
+            {
+                DataContext = vm
+            };
+            _mainViewModelLazy.Value.CurrentView = view;
+        }
         public void NavigateBack()
         {
             if (_navigationStack.Count > 1)
             {
                 _navigationStack.Pop();
                 var previousView = _navigationStack.Peek();
+
                 SetContent(previousView);
             }
         }

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Linq;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -23,29 +23,23 @@ namespace FinScope
 
         public override void OnFrameworkInitializationCompleted()
         {
-            // Create service collection
             var services = new ServiceCollection();
 
-
-            //services.AddDbContext<WorklyDBContext>(options =>
-            //   options.UseSqlServer("Your_Connection_String_Here"));
-
-            // Register services
-            services.AddSingleton<INavigationService, NavigationService>();
+            // Сервисы
+          services.AddHttpClient<IMarketDataService, MoexMarketDataService>();
             services.AddSingleton<IAuthService, AuthService>();
-            services.AddSingleton<IFileDialogService>(provider =>
-            {
-                var mainWindow = Avalonia.Application.Current.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop
-                    ? desktop.MainWindow
-                    : throw new InvalidOperationException("MainWindow is not available.");
 
-                return new FileDialogService(mainWindow);
+            // MainWindowViewModel как Singleton
+            services.AddSingleton<MainWindowViewModel>();
+
+            services.AddSingleton<INavigationService>(provider =>
+            {
+                var marketDataService = provider.GetRequiredService<IMarketDataService>();
+                var lazyMainVM = new Lazy<MainWindowViewModel>(() => provider.GetRequiredService<MainWindowViewModel>());
+                return new NavigationService(marketDataService, lazyMainVM);
             });
 
-
-
-            // Register ViewModels
-            services.AddTransient<MainWindowViewModel>();
+            // Остальные ViewModels — Transient
             services.AddTransient<LoginViewModel>();
             services.AddTransient<RegisterViewModel>();
             services.AddTransient<DashboardViewModel>();
@@ -53,11 +47,9 @@ namespace FinScope
             services.AddTransient<PortfolioViewModel>();
             services.AddTransient<TransactionsViewModel>();
             services.AddTransient<NewsViewModel>();
-            //services.AddTransient<EmployerProfileViewModel>();
-            //services.AddTransient<VacancyDetailsViewModel>();
-            //services.AddTransient<ResumeDetailsViewModel>();
+            services.AddTransient<StockDetailViewModel>();
 
-
+            // View'ы
             services.AddTransient<MainWindow>();
             services.AddTransient<LoginView>();
             services.AddTransient<RegisterView>();
@@ -66,31 +58,28 @@ namespace FinScope
             services.AddTransient<PortfolioView>();
             services.AddTransient<TransactionsView>();
             services.AddTransient<NewsView>();
-            //services.AddTransient<EmployerProfileView>();
-            //services.AddTransient<VacancyDetailsView>();
-            //services.AddTransient<ResumeDetailsView>();
+            services.AddTransient<StockDetailView>();
 
-
-
+            // Build ServiceProvider
             Services = services.BuildServiceProvider();
 
+            // Инициализация MainWindow
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
                 DisableAvaloniaDataAnnotationValidation();
 
-                desktop.MainWindow = new MainWindow
+                var mainWindow = new MainWindow
                 {
-                    DataContext = Services.GetRequiredService<MainWindowViewModel>(),
+                    DataContext = Services.GetRequiredService<MainWindowViewModel>()
                 };
 
-                var navigationService = Services.GetRequiredService<INavigationService>();
+                desktop.MainWindow = mainWindow;
 
-
-                if (navigationService is NavigationService navService)
+                // Только если тебе нужно — установка ссылки на окно
+                if (Services.GetRequiredService<INavigationService>() is NavigationService navService)
                 {
-                    navService.SetMainWindow(desktop.MainWindow);
+                    navService.SetMainWindow(mainWindow);
                 }
-
             }
 
             base.OnFrameworkInitializationCompleted();
@@ -106,5 +95,5 @@ namespace FinScope
                 BindingPlugins.DataValidators.Remove(plugin);
             }
         }
-}
+    }
 }

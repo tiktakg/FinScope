@@ -14,6 +14,7 @@ namespace FinScope.ViewModels
         [ObservableProperty] private DateTime? startDate;
         [ObservableProperty] private DateTime? endDate;
         [ObservableProperty] private string? selectedTransactionType;
+        [ObservableProperty] private string? symbolSearch;
 
         public ObservableCollection<string> TransactionTypes { get; } = new() { "Покупка", "Продажа" };
 
@@ -46,7 +47,29 @@ namespace FinScope.ViewModels
                 Quantity = 5,
                 Price = 210.75m
             });
+            AllTransactions.Add(new Transaction
+            {
+                Date = DateTime.Now.AddDays(-2),
+                Type = "Покупка",
+                Symbol = "MSFT",
+                Quantity = 8,
+                Price = 320.5m,
+                Exchange = "NASDAQ",
+                Sector = "Technology",
+                Description = "Microsoft Corporation"
+            });
 
+            AllTransactions.Add(new Transaction
+            {
+                Date = DateTime.Now.AddDays(-3),
+                Type = "Продажа",
+                Symbol = "AMZN",
+                Quantity = 3,
+                Price = 125.9m,
+                Exchange = "NASDAQ",
+                Sector = "E-commerce",
+                Description = "Amazon.com Inc"
+            });
             ApplyFilter();
         }
 
@@ -64,10 +87,20 @@ namespace FinScope.ViewModels
             if (!string.IsNullOrEmpty(SelectedTransactionType))
                 filtered = filtered.Where(t => t.Type == SelectedTransactionType);
 
+            if (!string.IsNullOrWhiteSpace(SymbolSearch))
+                filtered = filtered.Where(t => t.Symbol.Contains(SymbolSearch, StringComparison.OrdinalIgnoreCase));
+
             foreach (var tx in filtered)
                 FilteredTransactions.Add(tx);
         }
+        [RelayCommand]
+        private void ShowDetails(Transaction? tx)
+        {
+            if (tx == null) return;
 
+            // Для примера - можно показать всплывающее окно или перейти на другую страницу
+            Console.WriteLine($"Подробнее: {tx.Symbol}, {tx.Description}");
+        }
         private void ResetFilter()
         {
             StartDate = null;

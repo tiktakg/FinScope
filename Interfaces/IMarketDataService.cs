@@ -1,0 +1,23 @@
+﻿using FinScope.ViewModels;
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using static MoexMarketDataService;
+
+namespace FinScope.Interfaces
+{
+    public interface IMarketDataService
+    {
+        Task<IEnumerable<Stock>> GetTopStocksAsync();
+        Task<Stock?> GetStockBySymbolAsync(string symbol);
+        Task<Dictionary<string, Stock>> GetMarketIndicesAsync();
+        Task<IEnumerable<Stock>> GetStocksBySectorAsync(string sector);
+        Task<IEnumerable<string>> GetAvailableSymbolsAsync();
+        Task<IEnumerable<CandleStickData>> GetCandlestickDataAsync(string symbol);
+        Task<CompanyInfo> GetCompanyInfoAsync(string symbol);
+        Task<IEnumerable<NewsItem>> GetNewsAsync(string symbol);
+    }
+}

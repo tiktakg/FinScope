@@ -26,21 +26,20 @@
 
 	<ScrollViewer>
 		<StackPanel Margin="20">
-			<TextBlock Text="Финансовые новости" Classes="header" Margin="0 0 0 20"/>
+			<TextBlock Text="Финансовые новости" FontSize="24" FontWeight="Bold" Margin="0 0 0 20"/>
 
 			<ItemsControl ItemsSource="{Binding News}">
 				<ItemsControl.ItemTemplate>
 					<DataTemplate>
-						<Border Classes="card">
+						<Border Margin="0 0 0 15" Padding="10" Background="#FF2B2B2B" CornerRadius="8">
 							<StackPanel>
-								<TextBlock Text="{Binding Headline}" FontWeight="Bold" FontSize="18" Margin="0 0 0 5"/>
-								<TextBlock Text="{Binding Source}" FontStyle="Italic" Foreground="Gray"/>
-								<TextBlock Text="{Binding Summary}" TextWrapping="Wrap" Margin="0 5 0 5"/>
-								<StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10">
-									<TextBlock Text="{Binding Datetime, StringFormat='{}{0:dd.MM.yyyy HH:mm}'}" Foreground="DarkGray"/>
-									<Button Content="Открыть" Command="{Binding DataContext.OpenNewsCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                            CommandParameter="{Binding Url}" />
-								</StackPanel>
+								<TextBlock Text="{Binding Title}" FontWeight="Bold" FontSize="16"/>
+								<TextBlock Text="{Binding Description}" TextWrapping="Wrap" Margin="0 5 0 0"/>
+								<TextBlock Text="{Binding Source}" Foreground="Gray" FontStyle="Italic" FontSize="12"/>
+								<TextBlock Foreground="LightBlue" TextDecorations="Underline"
+										  Text="Читать далее"
+										  Cursor="Hand"
+										  PointerPressed="OnReadMoreClicked"/>
 							</StackPanel>
 						</Border>
 					</DataTemplate>

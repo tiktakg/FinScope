@@ -6,6 +6,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static MoexMarketDataService;
 
 namespace FinScope.ViewModels
 {
@@ -89,13 +90,11 @@ public class Asset : ObservableObject
         public int Quantity { get; set; }
         public decimal Price { get; set; }
         public decimal Total => Quantity * Price;
+        public string? Exchange { get; set; }
+        public string? Sector { get; set; }
+        public string? Description { get; set; }
     }
-    public class NewsItem
-{
-    public string Title { get; set; }
-    public string Source { get; set; }
-    public string Summary { get; set; }
-}
+
 }
 
 

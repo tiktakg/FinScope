@@ -11,6 +11,9 @@ namespace FinScope.ViewModels
     public partial class MainWindowViewModel : ObservableObject
     {
         private readonly INavigationService _navigationService;
+        public readonly IMarketDataService _marketDataService;
+
+  
 
         [ObservableProperty]
         private bool _isAuthenticated;
@@ -42,6 +45,8 @@ namespace FinScope.ViewModels
 
         public MainWindowViewModel(
             INavigationService navigationService,
+                  IMarketDataService marketDataService,
+          
             LoginViewModel loginViewModel,
             DashboardViewModel dashboardViewModel,
             MarketOverviewViewModel marketOverviewViewModel,
@@ -52,6 +57,7 @@ namespace FinScope.ViewModels
             //SettingsViewModel settingsViewModel
             )
         {
+            _marketDataService = marketDataService;
             _navigationService = navigationService;
             LoginViewModel = loginViewModel;
             DashboardViewModel = dashboardViewModel;
@@ -127,17 +133,18 @@ namespace FinScope.ViewModels
 
         #endregion
 
-    #region Helper Methods
+        #region Helper Methods
 
-        private void UpdateVisibilityFlags(string activeFlag)
+        public void NavigateToStockDetail(Stock stock)
         {
-            // Сбрасываем все флаги
-            ResetAllVisibilityFlags();
-
-            // Устанавливаем активный флаг
-            GetType().GetProperty(activeFlag)?.SetValue(this, true);
+            var stockDetailVM = new StockDetailViewModel(_marketDataService,stock);
+            CurrentView = new StockDetailView
+            {
+                DataContext = stockDetailVM
+            };
         }
 
+     
         private void ResetAllVisibilityFlags()
         {
             IsDashboardVisible = false;

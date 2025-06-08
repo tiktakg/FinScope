@@ -3,18 +3,18 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Markup.Xaml;
 using FinScope.ViewModels;
-using Microsoft.Extensions.DependencyInjection;
 using static FinScope.ViewModels.NewsViewModel;
 using System.Diagnostics;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace FinScope;
 
-public partial class NewsView : UserControl
+public partial class StockDetailView : UserControl
+
 {
-    public NewsView()
+    public StockDetailView()
     {
         InitializeComponent();
-        DataContext = ((App)Application.Current).Services.GetRequiredService<NewsViewModel>();
 
     }
     private void OnReadMoreClicked(object? sender, PointerPressedEventArgs e)
