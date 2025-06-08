@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FinScope.Interfaces;
+using System.Diagnostics;
 
 
 namespace FinScope.ViewModels
@@ -18,16 +19,10 @@ namespace FinScope.ViewModels
         private readonly IMarketDataService _marketDataService;
         public IAsyncRelayCommand LoadDataCommand { get; }
 
-        public ObservableCollection<Stock> MarketIndices { get; } = new ObservableCollection<Stock>();
 
         [ObservableProperty]
-        private MarketIndex _sp500 = new() { Name = "S&P 500", Value = 4123.34m, Change = 12.45m, ChangePercent = 0.30m };
-        public MarketIndex SP500 => _sp500;
-        [ObservableProperty]
-        private MarketIndex _nasdaq = new() { Name = "NASDAQ", Value = 12345.67m, Change = -23.45m, ChangePercent = -0.19m };
+        private ObservableCollection<MarketIndex> _marketIndices = new();
 
-        [ObservableProperty]
-        private MarketIndex _dowJones = new() { Name = "Dow Jones", Value = 33456.78m, Change = 45.67m, ChangePercent = 0.14m };
 
         [ObservableProperty]
         private ObservableCollection<Stock> _stocks = new();
@@ -110,11 +105,7 @@ namespace FinScope.ViewModels
         public async Task LoadMarketIndicesAsync()
         {
             var indices = await _marketDataService.GetMarketIndicesAsync();
-            MarketIndices.Clear();
-            foreach (var index in indices.Values)
-            {
-                MarketIndices.Add(index);
-            }
+            MarketIndices = new ObservableCollection<MarketIndex>(indices);
         }
 
         [RelayCommand]
@@ -127,15 +118,38 @@ namespace FinScope.ViewModels
         }
         private async Task LoadDataAsync()
         {
-            var stockList = (await _marketDataService.GetTopStocksAsync());
-            Stocks = new ObservableCollection<Stock>(stockList);
-            MarketSectors = new ObservableCollection<string>(
-                stockList.Select(s => s.Sector).Distinct().OrderBy(s => s));
+            try
+            {
+                var stockList = await _marketDataService.GetTopStocksAsync();
 
-            await LoadMarketIndicesAsync();
-            UpdateFilteredStocks();
-            OnPropertyChanged(nameof(FilteredStocks));
+                // Обновляем коллекцию акций — чтобы UI увидел изменения, лучше менять саму коллекцию через Dispatcher (если UI поток)
+                Stocks = new ObservableCollection<Stock>(stockList);
+
+                // Получаем уникальные сектора и сортируем
+                var sectors = stockList
+                    .Where(s => !string.IsNullOrEmpty(s.Sector))
+                    .Select(s => s.Sector)
+                    .Distinct()
+                    .OrderBy(s => s);
+
+                MarketSectors = new ObservableCollection<string>(sectors);
+
+                // Подгружаем индексы (предполагается, что LoadMarketIndicesAsync тоже async)
+                await LoadMarketIndicesAsync();
+
+                // Обновляем фильтрованный список акций
+                UpdateFilteredStocks();
+
+                // Уведомляем UI, что FilteredStocks изменился
+                OnPropertyChanged(nameof(FilteredStocks));
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[ERROR] LoadDataAsync: {ex.Message}");
+                // При необходимости, обработай ошибку (например, показать сообщение)
+            }
         }
+
         [RelayCommand]
         private async void ShowStockDetails(Stock stock)
         {
@@ -151,9 +165,9 @@ namespace FinScope.ViewModels
     {
         public string Symbol { get; set; }
         public string CompanyName { get; set; }
-        public decimal Price { get; set; }
-        public decimal Change { get; set; }
-        public decimal ChangePercent { get; set; }
+        public double Price { get; set; }
+        public double Change { get; set; }
+        public double ChangePercent { get; set; }
         public long Volume { get; set; }
         public int Quantity { get; set; }
 

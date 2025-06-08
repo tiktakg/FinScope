@@ -39,7 +39,11 @@ namespace FinScope.Services
             {
                 DataContext = vm
             };
+
             _mainViewModelLazy.Value.CurrentView = view;
+
+            // Запускаем загрузку данных
+            _ = vm.InitAsync(); // ⚠️ Fire-and-forget. Можно добавить лог или await если нужно
         }
         public void NavigateBack()
         {

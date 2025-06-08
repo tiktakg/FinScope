@@ -1,4 +1,4 @@
-﻿// Root myDeserializedClass = JsonConvert.DeserializeObject<List<Root>>(myJsonResponse);
+﻿// CandelsRoot myDeserializedClass = JsonConvert.DeserializeObject<List<CandelsRoot>>(myJsonResponse);
 using System.Collections.Generic;
 
 public class Charsetinfo
@@ -16,10 +16,11 @@ public class Dataversion
 
 public class Marketdatum
 {
+    public string SECID { get; set; }
     public double? LAST { get; set; }
     public double LASTCHANGE { get; set; }
     public double LASTCHANGEPRCNT { get; set; }
-    public int VOLTODAY { get; set; }
+    public long VOLTODAY { get; set; }
 }
 
 public class Root

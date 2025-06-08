@@ -1,24 +1,33 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:oxy="clr-namespace:OxyPlot.Avalonia;assembly=OxyPlot.Avalonia"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:FinScope.ViewModels"
              mc:Ignorable="d"
              x:Class="FinScope.StockDetailView"
              x:CompileBindings="False"
-			
              x:DataType="vm:StockDetailViewModel"
              d:DesignWidth="1000" d:DesignHeight="700">
 
-	<ScrollViewer>
-		<StackPanel Margin="20" Spacing="20">
-			<!-- Заголовок с названием компании и тикером -->
-			<TextBlock Text="{Binding Stock.CompanyName}" FontSize="26" FontWeight="Bold"/>
-			<TextBlock Text="{Binding Stock.Symbol}" FontSize="18" Foreground="Gray"/>
+	<Grid>
+		<!-- Основной контент с прокруткой -->
+		<ScrollViewer>
+			<StackPanel Margin="20" Spacing="20">
+				<!-- Заголовок с названием компании и тикером -->
+				<TextBlock Text="{Binding Stock.CompanyName}" FontSize="26" FontWeight="Bold"/>
+				<TextBlock Text="{Binding Stock.Symbol}" FontSize="18" Foreground="Gray"/>
 
-			<!-- График свечей -->
-			<oxy:PlotView Model="{Binding CandlestickPlotModel}"  />
+				<!-- График и основные показатели рядом -->
+				<Grid>
+					<Grid.ColumnDefinitions>
+						<ColumnDefinition Width="Auto"/>
+						<ColumnDefinition Width="20"/>
+						<ColumnDefinition Width="*"/>
+					</Grid.ColumnDefinitions>
+
+				
+					<Grid Grid.Column="1"/>
+
 
 			<!-- Основные показатели -->
 			<StackPanel Orientation="Horizontal" Spacing="40" Margin="0 20">
@@ -38,45 +47,152 @@
 					<TextBlock Text="{Binding Stock.Volume, StringFormat='{}{0:N0}'}"/>
 				</StackPanel>
 			</StackPanel>
+				</Grid>
 
-			<!-- Информация по компании -->
-			<Border Classes="card">
-				<StackPanel>
+				<!-- Информация по компании -->
+			<Border Classes="card" Margin="0 20">
+				<StackPanel Spacing="10">
 					<TextBlock Text="Информация о компании" FontWeight="Bold" FontSize="18" Margin="0 0 0 10"/>
-					<TextBlock Text="{Binding Stock.CompanyDescription}" TextWrapping="Wrap" />
+
+
+					<TextBlock>
+						<Run Text="Краткое имя: " FontWeight="Bold"/>
+						<Run Text="{Binding CompanyInfo.ShortName}"/>
+					</TextBlock>
+
+					<TextBlock>
+						<Run Text="Полное имя: " FontWeight="Bold"/>
+						<Run Text="{Binding CompanyInfo.FullName}"/>
+					</TextBlock>
+
+
+					<TextBlock>
+						<Run Text="Гос. регистрация: " FontWeight="Bold"/>
+						<Run Text="{Binding CompanyInfo.RegNumber}"/>
+					</TextBlock>
+
+					<TextBlock>
+						<Run Text="Тип бумаги: " FontWeight="Bold"/>
+						<Run Text="{Binding CompanyInfo.IssueName}"/>
+					</TextBlock>
+
+					<TextBlock>
+						<Run Text="Категория: " FontWeight="Bold"/>
+						<Run Text="{Binding CompanyInfo.TypeName}"/>
+					</TextBlock>
+
+					<TextBlock>
+						<Run Text="Инструмент: " FontWeight="Bold"/>
+						<Run Text="{Binding CompanyInfo.GroupName}"/>
+					</TextBlock>
+
+					<TextBlock>
+						<Run Text="Валюта: " FontWeight="Bold"/>
+						<Run Text="{Binding CompanyInfo.Currency}"/>
+					</TextBlock>
+
+					<TextBlock>
+						<Run Text="Объем выпуска: " FontWeight="Bold"/>
+						<Run Text="{Binding CompanyInfo.IssueSize, StringFormat={}{0:N0}}"/>
+					</TextBlock>
+
+					<TextBlock>
+						<Run Text="Номинал: " FontWeight="Bold"/>
+						<Run Text="{Binding CompanyInfo.FaceValue, StringFormat={}{0:C2}}"/>
+					</TextBlock>
+
+					<TextBlock>
+						<Run Text="Дата выпуска: " FontWeight="Bold"/>
+						<Run Text="{Binding CompanyInfo.IssueDate, StringFormat={}{0:dd.MM.yyyy}}"/>
+					</TextBlock>
+
+					<TextBlock>
+						<Run Text="Уровень листинга: " FontWeight="Bold"/>
+						<Run Text="{Binding CompanyInfo.ListingLevel}"/>
+					</TextBlock>
 				</StackPanel>
 			</Border>
 
+				<!-- Кнопка добавить -->
+				<Button Content="Добавить в портфель"
+						Width="200"
+						HorizontalAlignment="Left"
+						Command="{Binding ShowAddToPortfolioModalCommand}"/>
 			<!-- Новости -->
 			<Border Classes="card">
 				<StackPanel>
 					<TextBlock Text="Новости" FontWeight="Bold" FontSize="18" Margin="0 0 0 10"/>
-					<ItemsControl ItemsSource="{Binding News}">
-						<ItemsControl.ItemTemplate>
-							<DataTemplate>
-								<StackPanel Margin="0 5">
-									<TextBlock Text="{Binding Title}" FontWeight="Bold"/>
-									<TextBlock Text="{Binding PublishedAt, StringFormat='{}Дата: {0:dd.MM.yyyy}'}" FontSize="10" Foreground="Gray"/>
-									<TextBlock Text="{Binding Summary}" TextWrapping="Wrap"/>
-									<TextBlock Foreground="LightBlue" TextDecorations="Underline"
-										  Text="Читать полностью"
-										  Cursor="Hand"
-										  PointerPressed="OnReadMoreClicked"/>
-									
-								
-									<Separator Margin="0 5"/>
-								</StackPanel>
-							</DataTemplate>
-						</ItemsControl.ItemTemplate>
-					</ItemsControl>
+					<ScrollViewer Height="300" VerticalScrollBarVisibility="Auto">
+						<!-- Высота под 5 элементов -->
+						<ItemsControl ItemsSource="{Binding News}">
+							<ItemsControl.ItemTemplate>
+								<DataTemplate>
+									<StackPanel Margin="0 5">
+										<TextBlock Text="{Binding Title}" FontWeight="Bold"/>
+										<TextBlock Text="{Binding Source}" FontSize="12" Foreground="#FFA0A0A0"/>
+										<TextBlock Text="{Binding PublishedAt, StringFormat='{}Дата: {0:dd.MM.yyyy}'}" FontSize="10" Foreground="Gray"/>
+										<Separator Margin="0 5"/>
+									</StackPanel>
+								</DataTemplate>
+							</ItemsControl.ItemTemplate>
+						</ItemsControl>
+					</ScrollViewer>
 				</StackPanel>
 			</Border>
 
-			<!-- Кнопка добавить -->
-			<Button Content="Добавить в портфель"
-                    Width="200"
-                    HorizontalAlignment="Left"
-                    Command="{Binding AddToPortfolioCommand}"/>
 		</StackPanel>
 	</ScrollViewer>
+	<!-- Модальное окно поверх -->
+		<Border Background="#80000000"
+				IsVisible="{Binding IsAddToPortfolioModalVisible}"
+				HorizontalAlignment="Stretch"
+				VerticalAlignment="Stretch">
+			<Border Width="340"
+					Background="#FF252525"
+					CornerRadius="12"
+					Padding="20"
+					HorizontalAlignment="Center"
+					VerticalAlignment="Center">
+				<StackPanel Spacing="20" HorizontalAlignment="Stretch">
+					<TextBlock Text="Добавление акций в портфель"
+							   FontWeight="Bold"
+							   FontSize="18"
+							   Foreground="White"
+							   HorizontalAlignment="Center"/>
+
+					<StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center">
+						<TextBlock Text="Введите количество акций:"
+								   FontSize="14"
+								   Foreground="White"
+								   VerticalAlignment="Center"/>
+						<TextBox Text="{Binding AddStockCount, Mode=TwoWay}"
+								 Width="100"
+								 Background="#333"
+								 Foreground="White"
+								 BorderBrush="#555"
+								 BorderThickness="1"
+								 VerticalAlignment="Center"/>
+					</StackPanel>
+					<StackPanel Orientation="Horizontal"
+								Spacing="10"
+								HorizontalAlignment="Right">
+						<Button Content="Отмена"
+								Width="90"
+								Command="{Binding CancelAddToPortfolioCommand}"
+								Background="#444"
+								Foreground="White"
+								BorderBrush="#666"/>
+						<Button Content="Добавить"
+								Width="90"
+								Command="{Binding AddToPortfolioCommand}"
+								Background="#28a745"
+								Foreground="White"
+								BorderBrush="#1e7e34"/>
+					</StackPanel>
+				</StackPanel>
+			</Border>
+		</Border>
+
+	</Grid>
+	
 </UserControl>

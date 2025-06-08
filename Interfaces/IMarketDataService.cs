@@ -13,11 +13,12 @@ namespace FinScope.Interfaces
     {
         Task<IEnumerable<Stock>> GetTopStocksAsync();
         Task<Stock?> GetStockBySymbolAsync(string symbol);
-        Task<Dictionary<string, Stock>> GetMarketIndicesAsync();
-        Task<IEnumerable<Stock>> GetStocksBySectorAsync(string sector);
-        Task<IEnumerable<string>> GetAvailableSymbolsAsync();
+        Task<List<MarketIndex>> GetMarketIndicesAsync();
+        //Task<IEnumerable<Stock>> GetStocksBySectorAsync(string sector);
+        //Task<IEnumerable<string>> GetAvailableSymbolsAsync();
         Task<IEnumerable<CandleStickData>> GetCandlestickDataAsync(string symbol);
-        Task<CompanyInfo> GetCompanyInfoAsync(string symbol);
-        Task<IEnumerable<NewsItem>> GetNewsAsync(string symbol);
+        Task<CompanyInfoDetails> GetCompanyDetailsAsync(string symbol);
+        Task<IEnumerable<NewsArticle>> GetNewsAsync(string symbol);
+        Task<string> GetNewsBodyByIdAsync(int id);
     }
 }

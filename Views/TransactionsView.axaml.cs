@@ -1,6 +1,5 @@
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Markup.Xaml;
 using FinScope.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 

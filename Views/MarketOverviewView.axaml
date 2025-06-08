@@ -14,7 +14,7 @@
 			<Setter Property="FontSize" Value="24"/>
 			<Setter Property="FontWeight" Value="Bold"/>
 			<Setter Property="Margin" Value="0 0 15 0"/>
-			<Setter Property="Foreground" Value="{DynamicResource SystemAccentColorBrush}"/>
+			<Setter Property="Foreground" Value="White"/>
 		</Style>
 
 		<Style Selector="Border.card">
@@ -49,12 +49,6 @@
 			<!-- Фильтры и сортировка -->
 			<Border Classes="card">
 				<StackPanel Orientation="Horizontal" Spacing="15" VerticalAlignment="Center">
-					<ComboBox ItemsSource="{Binding MarketSectors}"
-                              SelectedItem="{Binding SelectedSector, Mode=TwoWay}"
-                              Width="200"
-                              Height="30"
-                              PlaceholderText="Все сектора"/>
-
 					<TextBox Watermark="Поиск по названию или тикеру..."
                              Text="{Binding SearchQuery, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                              Width="300"
@@ -74,7 +68,7 @@
 			</Border>
 
 			<!-- Индексы -->
-			<TextBlock Text="Рыночные индексы" Classes="header" Margin="0 20 0 0"/>
+			<TextBlock Text="Рыночные индексы" Classes="header" Margin="0 5 0 0"/>
 			<ItemsControl ItemsSource="{Binding MarketIndices}">
 				<ItemsControl.ItemsPanel>
 					<ItemsPanelTemplate>
@@ -85,8 +79,8 @@
 					<DataTemplate>
 						<Border Classes="card" Width="220" Margin="5">
 							<StackPanel>
-								<TextBlock Text="{Binding CompanyName}" FontSize="16" FontWeight="Bold"/>
-								<TextBlock Text="{Binding Price, StringFormat='{}{0:N2} ₽'}"
+								<TextBlock Text="{Binding Name}" FontSize="16" FontWeight="Bold"/>
+								<TextBlock Text="{Binding Value, StringFormat='{}{0:N2} ₽'}"
                                            FontSize="22" Margin="0 5"/>
 								<StackPanel Orientation="Horizontal" Spacing="5">
 									<TextBlock Text="{Binding Change, StringFormat='{}{0:+0.00;-0.00;0.00} ₽'}"
@@ -101,7 +95,7 @@
 			</ItemsControl>
 
 			<!-- Таблица акций -->
-			<TextBlock Text="Акции" Classes="header" Margin="0 20 0 0"/>
+			<TextBlock Text="Акции" Classes="header"  Margin="0 20 0 0"/>
 			<Border Classes="card" Padding="0">
 				<ItemsControl ItemsSource="{Binding FilteredStocks}">
 					<!-- Заголовки колонок -->
@@ -128,7 +122,6 @@
 										<TextBlock Text="Изменение" Grid.Column="3" FontWeight="Bold" Foreground="White"/>
 										<TextBlock Text="Изменение %" Grid.Column="4" FontWeight="Bold" Foreground="White"/>
 										<TextBlock Text="Объем" Grid.Column="5" FontWeight="Bold" Foreground="White"/>
-										<TextBlock Text="Сектор" Grid.Column="6" FontWeight="Bold" Foreground="White"/>
 										<TextBlock Text="Действия" Grid.Column="7" FontWeight="Bold" Foreground="White"/>
 									</Grid>
 								</Border>
@@ -177,8 +170,6 @@
 									<!-- Объем -->
 									<TextBlock Text="{Binding Volume, StringFormat='{}{0:N0}'}" Grid.Column="5" Foreground="White"/>
 
-									<!-- Сектор -->
-									<TextBlock Text="{Binding Sector}" Grid.Column="6" Foreground="White" TextTrimming="CharacterEllipsis"/>
 
 									<!-- Действия -->
 									<Button Content="Подробнее"
@@ -191,7 +182,6 @@
 						</DataTemplate>
 					</ItemsControl.ItemTemplate>
 
-					<!-- Альтернативный фон для четных строк -->
 				
 				</ItemsControl>
 			</Border>

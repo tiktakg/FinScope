@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using FinScope.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -12,75 +13,82 @@ namespace FinScope.ViewModels
 {
     public partial class DashboardViewModel : ObservableObject
     {
-    // private readonly IPortfolioService _portfolioService;
-    //private readonly IMarketDataService _marketDataService;
+        // private readonly IPortfolioService _portfolioService;
+        private readonly IMarketDataService _marketDataService;
 
-    [ObservableProperty]
-    private decimal _portfolioBalance = 12500.75m;
+        [ObservableProperty]
+        private decimal _portfolioBalance = 12500.75m;
 
-    [ObservableProperty]
-    private decimal _balanceChangePercent = 2.34m;
+        [ObservableProperty]
+        private decimal _balanceChangePercent = 2.34m;
 
-    [ObservableProperty]
-    private decimal _totalProfit = 1250.50m;
+        [ObservableProperty]
+        private decimal _totalProfit = 1250.50m;
 
-    [ObservableProperty]
-    private decimal _profitPercent = 12.5m;
+        [ObservableProperty]
+        private decimal _profitPercent = 12.5m;
 
-    [ObservableProperty]
-    private ObservableCollection<Asset> _topAssets = new()
+        [ObservableProperty]
+        private ObservableCollection<Asset> _topAssets = new()
         {
             new Asset { Symbol = "AAPL", Value = 4500.00m, ChangePercent = 1.23m },
             new Asset { Symbol = "MSFT", Value = 3800.00m, ChangePercent = -0.45m },
             new Asset { Symbol = "GOOGL", Value = 2200.00m, ChangePercent = 3.21m }
         };
 
-    [ObservableProperty]
-    private ObservableCollection<Transaction> _recentTransactions = new()
+        [ObservableProperty]
+        private ObservableCollection<Transaction> _recentTransactions = new()
         {
             new Transaction { Date = DateTime.Now.AddDays(-1), Symbol = "AAPL", Type = "Покупка", Price = 1000.00m },
             new Transaction { Date = DateTime.Now.AddDays(-3), Symbol = "MSFT", Type = "Продажа", Price = -750.00m }
         };
 
-    [ObservableProperty]
-    private ObservableCollection<NewsItem> _marketNews = new()
+        [ObservableProperty]
+        private ObservableCollection<NewsArticle> _marketNews = new()
         {
-            new NewsItem { Title = "ФРС оставляет ставки без изменений", Source = "Bloomberg", Summary = "Федеральная резервная система приняла решение..." },
-            new NewsItem { Title = "Apple представляет новые продукты", Source = "CNBC", Summary = "Компания Apple анонсировала новую линейку..." }
+            new NewsArticle { Title = "ФРС оставляет ставки без изменений", Source = "Bloomberg", Summary = "Федеральная резервная система приняла решение..." },
+            new NewsArticle { Title = "Apple представляет новые продукты", Source = "CNBC", Summary = "Компания Apple анонсировала новую линейку..." }
         };
 
-    public string BalanceChangeColor => BalanceChangePercent >= 0 ? "#FF4CAF50" : "#FFF44336";
-    public string ProfitColor => ProfitPercent >= 0 ? "#FF4CAF50" : "#FFF44336";
+        public string BalanceChangeColor => BalanceChangePercent >= 0 ? "#FF4CAF50" : "#FFF44336";
+        public string ProfitColor => ProfitPercent >= 0 ? "#FF4CAF50" : "#FFF44336";
 
-    public DashboardViewModel(
-        //IPortfolioService portfolioService, IMarketDataService marketDataService
-        )
-    {
-        //_portfolioService = portfolioService;
-        //_marketDataService = marketDataService;
+        public DashboardViewModel(
+            //IPortfolioService portfolioService,
+            IMarketDataService marketDataService
+            )
+        {
+            //_portfolioService = portfolioService;
+            _marketDataService = marketDataService;
 
-        LoadDataCommand = new AsyncRelayCommand(LoadDataAsync);
-        LoadDataCommand.Execute(null);
+            LoadDataCommand = new AsyncRelayCommand(LoadDataAsync);
+            LoadDataCommand.Execute(null);
+        }
+
+        public IAsyncRelayCommand LoadDataCommand { get; }
+
+        private async Task LoadDataAsync()
+        {
+            await LoadNewsAsync();
+        }
+        private async Task LoadNewsAsync()
+        {
+            var newsItems = await _marketDataService.GetNewsAsync("Sber");
+            _marketNews.Clear();
+            foreach (var n in newsItems)
+            {
+                _marketNews.Add(n);
+            }
+        }
     }
 
-    public IAsyncRelayCommand LoadDataCommand { get; }
-
-    private async Task LoadDataAsync()
+    public class Asset : ObservableObject
     {
-        // Здесь будет реальная загрузка данных из сервисов
-        // var portfolio = await _portfolioService.GetPortfolioAsync();
-        // PortfolioBalance = portfolio.TotalValue;
-        // и т.д.
+        public string Symbol { get; set; }
+        public decimal Value { get; set; }
+        public decimal ChangePercent { get; set; }
+        public string ChangeColor => ChangePercent >= 0 ? "#FF4CAF50" : "#FFF44336";
     }
-}
-
-public class Asset : ObservableObject
-{
-    public string Symbol { get; set; }
-    public decimal Value { get; set; }
-    public decimal ChangePercent { get; set; }
-    public string ChangeColor => ChangePercent >= 0 ? "#FF4CAF50" : "#FFF44336";
-}
 
     public class Transaction
     {

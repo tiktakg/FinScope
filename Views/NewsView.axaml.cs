@@ -6,6 +6,7 @@ using FinScope.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using static FinScope.ViewModels.NewsViewModel;
 using System.Diagnostics;
+using static MoexMarketDataService;
 
 namespace FinScope;
 

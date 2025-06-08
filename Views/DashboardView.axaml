@@ -121,14 +121,14 @@
 			<Border Classes="card" Margin="0 20 0 0">
 				<StackPanel>
 					<TextBlock Text="Финансовые новости" FontSize="16" Margin="0 0 0 10"/>
-					<ItemsControl ItemsSource="{Binding MarketNews}">
+					<ItemsControl Height="300" ItemsSource="{Binding MarketNews}">
 						<ItemsControl.ItemTemplate>
 							<DataTemplate>
 								<Border Margin="0 0 0 10" Padding="10" Background="#FF333333" CornerRadius="4">
 									<StackPanel>
 										<TextBlock Text="{Binding Title}" FontWeight="Bold"/>
 										<TextBlock Text="{Binding Source}" FontSize="12" Foreground="#FFA0A0A0"/>
-										<TextBlock Text="{Binding Summary}" TextWrapping="Wrap" Margin="0 5 0 0"/>
+										<TextBlock Text="{Binding PublishedAt, StringFormat='{}Дата: {0:dd.MM.yyyy}'}" FontSize="10" Foreground="Gray"/>
 									</StackPanel>
 								</Border>
 							</DataTemplate>
