@@ -2,6 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+			 xmlns:ScottPlot="clr-namespace:ScottPlot.Avalonia;assembly=ScottPlot.Avalonia"
              xmlns:vm="clr-namespace:FinScope.ViewModels"
              mc:Ignorable="d"
              x:Class="FinScope.StockDetailView"
@@ -20,33 +21,33 @@
 				<!-- График и основные показатели рядом -->
 				<Grid>
 					<Grid.ColumnDefinitions>
-						<ColumnDefinition Width="Auto"/>
-						<ColumnDefinition Width="20"/>
 						<ColumnDefinition Width="*"/>
+						<!-- Основные показатели -->
+						<ColumnDefinition Width="20"/>
+						<!-- Отступ -->
+						<ColumnDefinition Width="2*"/>
+						<!-- График (вдвое шире) -->
 					</Grid.ColumnDefinitions>
 
-				
-					<Grid Grid.Column="1"/>
-
-
 			<!-- Основные показатели -->
-			<StackPanel Orientation="Horizontal" Spacing="40" Margin="0 20">
-				<StackPanel>
-					<TextBlock Text="Цена" FontWeight="Bold"/>
-					<TextBlock Text="{Binding Stock.Price, StringFormat='{}{0:C2}'}"/>
-				</StackPanel>
+					<StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="20" Margin="0 20">
+						<StackPanel>
+							<TextBlock Text="Цена" FontWeight="Bold"/>
+							<TextBlock Text="{Binding Stock.Price, StringFormat='{}{0:C2}'}" FontSize="16"/>
+						</StackPanel>
 
-				<StackPanel>
-					<TextBlock Text="Изменение" FontWeight="Bold"/>
-					<TextBlock Text="{Binding Stock.Change, StringFormat='{}{0:+0.00;-0.00;0.00}'}"
-                               Foreground="{Binding Stock.ChangeColor}"/>
-				</StackPanel>
+						<StackPanel>
+							<TextBlock Text="Изменение" FontWeight="Bold"/>
+							<TextBlock Text="{Binding Stock.Change, StringFormat='{}{0:+0.00;-0.00;0.00}'}"
+									   Foreground="{Binding Stock.ChangeColor}" FontSize="16"/>
+						</StackPanel>
 
-				<StackPanel>
-					<TextBlock Text="Объем" FontWeight="Bold"/>
-					<TextBlock Text="{Binding Stock.Volume, StringFormat='{}{0:N0}'}"/>
-				</StackPanel>
-			</StackPanel>
+						<StackPanel>
+							<TextBlock Text="Объем" FontWeight="Bold"/>
+							<TextBlock Text="{Binding Stock.Volume, StringFormat='{}{0:N0}'}" FontSize="16"/>
+						</StackPanel>
+					</StackPanel>
+					<ScottPlot:AvaPlot Name="AvaPlot" Grid.Column="2" Height="400"/>
 				</Grid>
 
 				<!-- Информация по компании -->

@@ -189,7 +189,7 @@ public class MoexMarketDataService : IMarketDataService
     {
         try
         {
-            var from = DateTime.UtcNow.AddDays(-30).ToString("yyyy-MM-dd");
+            var from = DateTime.UtcNow.AddDays(-360).ToString("yyyy-MM-dd");
             var to = DateTime.UtcNow.ToString("yyyy-MM-dd");
             var url = $"{Base}/engines/stock/markets/shares/securities/{symbol}/candles.json?from={from}&till={to}&interval=24";
 

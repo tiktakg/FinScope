@@ -8,7 +8,12 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using static MoexMarketDataService;
 using CommunityToolkit.Mvvm.Input;
-
+using ScottPlot.Avalonia;
+using ScottPlot;
+using System.Linq;
+using ScottPlot;
+using ScottPlot.Plottables;
+using SkiaSharp;
 
 
 namespace FinScope.ViewModels;
@@ -21,7 +26,10 @@ public partial class StockDetailViewModel : ObservableValidator
 
     [ObservableProperty]
     private CompanyInfoDetails _companyInfo;
-  
+
+    [ObservableProperty]
+    private IReadOnlyList<OHLC> _ohlcData; // только данные
+
     [ObservableProperty]
     private bool isAddToPortfolioModalVisible;
 
@@ -41,6 +49,9 @@ public partial class StockDetailViewModel : ObservableValidator
         ShowAddToPortfolioModalCommand = new RelayCommand(() => IsAddToPortfolioModalVisible = true);
         CancelAddToPortfolioCommand = new RelayCommand(() => IsAddToPortfolioModalVisible = false);
 
+
+        // Создаем тестовые данные для свечей (OHLC)
+     
     }
     public async Task InitAsync()
     {
@@ -50,6 +61,7 @@ public partial class StockDetailViewModel : ObservableValidator
     {
         try
         {
+            await LoadCandlestickDataAsync();
             await LoadCompanyInfoAsync();
             await LoadNewsAsync();
         }
@@ -64,75 +76,20 @@ public partial class StockDetailViewModel : ObservableValidator
         CompanyInfo = await _marketDataService.GetCompanyDetailsAsync(Stock.Symbol);
       
     }
-   
-    //private async Task LoadCandlestickDataAsync()
-    //{
-    //    var candles = (await _marketDataService.GetCandlestickDataAsync(Stock.Symbol))
-    //             .OrderBy(c => c.Date)
-    //             .ToList();
 
-    //    Debug.WriteLine($"First candle date: {candles.First().Date}, Last candle date: {candles.Last().Date}");
+    public async Task LoadCandlestickDataAsync()
+    {
+        var candles = (await _marketDataService.GetCandlestickDataAsync(Stock.Symbol))
+            .OrderBy(c => c.Date)
+            .ToList();
 
-    //    var plotModel = new PlotModel { Title = $"{Stock.Symbol} - Свечи" };
+        _ohlcData = candles.Select(c => new OHLC(
+            c.Open, c.High, c.Low, c.Close,
+            c.Date,
+            TimeSpan.FromDays(1)
+        )).ToList();
+    }
 
-    //    // Ось дат
-    //    var dateAxis = new DateTimeAxis
-    //    {
-    //        Position = AxisPosition.Bottom,
-    //        StringFormat = "dd.MM",
-    //        MajorGridlineStyle = LineStyle.Solid,
-    //        MinorGridlineStyle = LineStyle.Dot,
-    //        IsZoomEnabled = true,
-    //        IsPanEnabled = true,
-    //        Minimum = DateTimeAxis.ToDouble(candles.Min(c => c.Date)),
-    //        Maximum = DateTimeAxis.ToDouble(candles.Max(c => c.Date))
-    //    };
-
-    //    // Ценовая ось
-    //    var priceAxis = new LinearAxis
-    //    {
-    //        Position = AxisPosition.Left,
-    //        MajorGridlineStyle = LineStyle.Solid,
-    //        MinorGridlineStyle = LineStyle.Dot,
-    //        IsZoomEnabled = true,
-    //        IsPanEnabled = true,
-    //        Minimum = candles.Min(c => c.Low) * 0.98,
-    //        Maximum = candles.Max(c => c.High) * 1.02
-    //    };
-
-    //    // Свечная серия
-    //    var candleSeries = new CandleStickSeries
-    //    {
-    //        ItemsSource = candles,
-    //        DataFieldX = "X",  // Используем вычисляемое свойство X
-    //        DataFieldHigh = "High",
-    //        DataFieldLow = "Low",
-    //        DataFieldOpen = "Open",
-    //        DataFieldClose = "Close",
-    //        IncreasingColor = OxyColors.Green,
-    //        DecreasingColor = OxyColors.Red,
-    //        StrokeThickness = 1,
-    //          CandleWidth = 0.8
-    //    };
-
-    //    plotModel.Axes.Add(dateAxis);
-    //    plotModel.Axes.Add(priceAxis);
-    //    plotModel.Series.Add(candleSeries);
-
-    //    // Тестовая линейная серия (для проверки)
-    //    var testSeries = new LineSeries
-    //    {
-    //        ItemsSource = candles,
-    //        DataFieldX = "X",
-    //        DataFieldY = "Close",
-    //        Color = OxyColors.Blue,
-    //        StrokeThickness = 1
-    //    };
-    //    plotModel.Series.Add(testSeries);
-
-    //    CandlestickPlotModel = plotModel;
-    //    CandlestickPlotModel.InvalidatePlot(true);
-    //}
 
 
 
