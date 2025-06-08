@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FinScope.Enitys;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,10 +10,9 @@ namespace FinScope.Interfaces
 {
     public interface IAuthService
     {
-        //    User? CurrentUser { get; }
-        //    bool IsAuthenticated { get; }
-        //    bool LoginAsync(string email, string password);
-        //    void Logout();
-        //}
+        User? CurrentUser { get; }
+        bool IsAuthenticated { get; }
+        bool LoginAsync(string email, string password);
+        void Logout();
     }
 }

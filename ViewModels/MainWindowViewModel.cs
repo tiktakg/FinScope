@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using FinScope.Enitys;
 using FinScope.Interfaces;
 using FinScope.Views;
 using System;
@@ -10,6 +11,7 @@ namespace FinScope.ViewModels
 {
     public partial class MainWindowViewModel : ObservableObject
     {
+        private readonly IAuthService _authService;
         private readonly INavigationService _navigationService;
         public readonly IMarketDataService _marketDataService;
 
@@ -44,6 +46,7 @@ namespace FinScope.ViewModels
         //public SettingsViewModel SettingsViewModel { get; }
 
         public MainWindowViewModel(
+            IAuthService authService,
             INavigationService navigationService,
                   IMarketDataService marketDataService,
           
@@ -57,6 +60,7 @@ namespace FinScope.ViewModels
             //SettingsViewModel settingsViewModel
             )
         {
+            _authService = authService;
             _marketDataService = marketDataService;
             _navigationService = navigationService;
             LoginViewModel = loginViewModel;
@@ -135,15 +139,7 @@ namespace FinScope.ViewModels
 
         #region Helper Methods
 
-        public void NavigateToStockDetail(Stock stock)
-        {
-            var stockDetailVM = new StockDetailViewModel(_marketDataService,stock);
-            CurrentView = new StockDetailView
-            {
-                DataContext = stockDetailVM
-            };
-        }
-
+       
      
         private void ResetAllVisibilityFlags()
         {

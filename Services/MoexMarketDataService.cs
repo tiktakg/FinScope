@@ -13,9 +13,13 @@ using System.Text.Json.Serialization;
 using Newtonsoft.Json;
 using FinScope.Models;
 using HtmlAgilityPack;
+using FinScope.Enitys;
+using Microsoft.EntityFrameworkCore;
+using FinScope.Context;
 
 public class MoexMarketDataService : IMarketDataService
 {
+    private readonly FinScopeDbContext _dbContext; 
     private readonly HttpClient _client;
     private const string Base = "https://iss.moex.com/iss";
 
@@ -41,14 +45,26 @@ public class MoexMarketDataService : IMarketDataService
         { "RTS", "RTSI" }
     };
 
-    public MoexMarketDataService(HttpClient client) => _client = client;
+    public MoexMarketDataService(HttpClient client, 
+        FinScopeDbContext dbContext)
+    {
+        _client = client;
+        _dbContext = dbContext;
+    }
 
     public async Task<IEnumerable<Stock>> GetTopStocksAsync()
     {
         var tasks = _top.Select(GetStockBySymbolAsync);
-        var stocks = await Task.WhenAll(tasks);
-        return stocks.Where(s => s != null)!;
+        var stocks = (await Task.WhenAll(tasks)).Where(s => s != null)!;
+
+        
+        await SaveStocksAsync(stocks);
+
+        return stocks;
     }
+  
+
+
     public async Task<Stock?> GetStockBySymbolAsync(string symbol)
     {
         try
@@ -69,23 +85,24 @@ public class MoexMarketDataService : IMarketDataService
 
             // Получаем данные из securities
             var security = responseData[1].securities.FirstOrDefault();
+
             var companyName = security?.SECNAME ?? "N/A";
             var sector = security?.SECTORID?.ToString() ?? "N/A";
 
             // Получаем данные из marketdata (первое не-null значение LAST)
             var marketData = responseData[1].marketdata
                 .FirstOrDefault(m => m.LAST.HasValue) ?? responseData[1].marketdata.First();
-
+            var test = security.SECID;
             return new Stock
             {
                 Symbol = symbol,
                 CompanyName = companyName,
                 Sector = sector,
-                Price = marketData.LAST.HasValue ? marketData.LAST.Value : 0,
-                Change =marketData.LASTCHANGE,
-                ChangePercent = marketData.LASTCHANGEPRCNT,
-                Volume = marketData.VOLTODAY,
-                Quantity = 0 // Это поле не доступно в стандартном ответе MOEX
+
+                Price = (decimal?)marketData.LAST,
+                Change =(decimal?)marketData.LASTCHANGE,
+                ChangePercent = (decimal?)marketData.LASTCHANGEPRCNT,
+                Volume = marketData.VOLTODAY
             };
         }
         catch (Exception ex)
@@ -385,7 +402,75 @@ public class MoexMarketDataService : IMarketDataService
     }
 
 
+    public async Task LoadAndSaveTopStocksAsync()
+    {
+        try
+        {
+            var stocks = await GetTopStocksAsync();
 
+            foreach (var stock in stocks)
+            {
+                await SaveOrUpdateStockAsync(stock);
+            }
+
+            await _dbContext.SaveChangesAsync();
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"[ERROR] LoadAndSaveTopStocksAsync: {ex.Message}");
+            throw; // Или обработать ошибку по-другому
+        }
+    }
+
+    // Метод для сохранения или обновления акции
+
+    private async Task SaveStocksAsync(IEnumerable<Stock> stocks)
+    {
+        foreach (var stock in stocks)
+        {
+            await SaveOrUpdateStockAsync(stock);
+        }
+        await _dbContext.SaveChangesAsync();
+    }
+
+    private async Task SaveOrUpdateStockAsync(Stock stock)
+    {
+        var existingStock = await _dbContext.Stocks
+            .FirstOrDefaultAsync(s => s.Symbol == stock.Symbol);
+
+        if (existingStock == null)
+        {
+            await _dbContext.Stocks.AddAsync(stock);
+        }
+        else
+        {
+            existingStock.CompanyName = stock.CompanyName;
+            existingStock.Sector = stock.Sector;
+            existingStock.Price = stock.Price;
+            existingStock.Change = stock.Change;
+            existingStock.ChangePercent = stock.ChangePercent;
+            existingStock.Volume = stock.Volume;
+           
+        }
+    }
+
+    // Метод для получения акций из базы данных
+    public async Task<IEnumerable<Stock>> GetStocksFromDatabaseAsync()
+    {
+        return await _dbContext.Stocks
+            .OrderBy(s => s.Symbol)
+            .ToListAsync();
+    }
+
+    // Метод для очистки старых данных
+    public async Task ClearOldStockDataAsync(DateTime cutoffDate)
+    {
+        var oldStocks = await _dbContext.Stocks
+        .ToListAsync();
+
+        _dbContext.Stocks.RemoveRange(oldStocks);
+        await _dbContext.SaveChangesAsync();
+    }
     public static string HtmlToPlainText(string html)
     {
         if (string.IsNullOrWhiteSpace(html))
@@ -396,9 +481,6 @@ public class MoexMarketDataService : IMarketDataService
 
         return HtmlEntity.DeEntitize(doc.DocumentNode.InnerText);
     }
-
-
-
 
 
 

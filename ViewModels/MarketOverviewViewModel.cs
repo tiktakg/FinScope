@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using FinScope.Interfaces;
 using System.Diagnostics;
+using FinScope.Enitys;
 
 
 namespace FinScope.ViewModels
@@ -161,27 +162,8 @@ namespace FinScope.ViewModels
 
         }
     }
-    public class Stock : ObservableObject
-    {
-        public string Symbol { get; set; }
-        public string CompanyName { get; set; }
-        public double Price { get; set; }
-        public double Change { get; set; }
-        public double ChangePercent { get; set; }
-        public long Volume { get; set; }
-        public int Quantity { get; set; }
-
-        public string Sector { get; set; }
-        public string ChangeColor => ChangePercent >= 0 ? "#FF4CAF50" : "#FFF44336";
-    }
-    public class MarketIndex : ObservableObject
-    {
-        public string Name { get; set; }
-        public decimal Value { get; set; }
-        public decimal Change { get; set; }
-        public decimal ChangePercent { get; set; }
-        public string ChangeColor => ChangePercent >= 0 ? "#FF4CAF50" : "#FFF44336";
-    }
+  
+ 
 
 
 }

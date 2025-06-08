@@ -1,4 +1,5 @@
-﻿using FinScope.ViewModels;
+﻿using FinScope.Enitys;
+using FinScope.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Globalization;

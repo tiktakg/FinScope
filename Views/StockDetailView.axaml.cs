@@ -40,12 +40,6 @@ public partial class StockDetailView : UserControl
                 // the Style object contains helper methods to style many items at once
                 AvaPlot.Plot.Axes.Color(Color.FromHex("#ffffff") );
 
-                IXAxis xAxisSecondary = new TopAxis();
-                IYAxis yAxisSecondary = new RightAxis();
-                IXAxis xAxisPrimary = new BottomAxis();
-                IYAxis yAxisPrimary = new LeftAxis();
-
-
                 //AvaPlot.Plot.Axes.Color(xAxisPrimary, Color.FromHex("#a31c1c"));
 
 

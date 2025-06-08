@@ -1,5 +1,8 @@
 ﻿using Avalonia.Controls;
+using FinScope.Enitys;
+using FinScope.Services;
 using FinScope.ViewModels;
+using Microsoft.EntityFrameworkCore;
 
 namespace FinScope.Interfaces
 {
@@ -7,6 +10,10 @@ namespace FinScope.Interfaces
     {
         void Navigate(UserControl view);
         void NavigateToStockDetail(Stock stock);
+        void NavigateToLogin();
+
+
+        void NavigateToRegister();
         void NavigateBack();
     }
 }

@@ -14,13 +14,18 @@ using System.Linq;
 using ScottPlot;
 using ScottPlot.Plottables;
 using SkiaSharp;
+using FinScope.Context;
+using Microsoft.EntityFrameworkCore;
+using FinScope.Enitys;
 
 
 namespace FinScope.ViewModels;
 
 public partial class StockDetailViewModel : ObservableValidator
 {
+    private readonly FinScopeDbContext _dbContext; // Добавим через конструктор
     private readonly IMarketDataService _marketDataService;
+    private readonly IAuthService _authService;
 
     public Stock Stock { get; private set; }
 
@@ -40,9 +45,15 @@ public partial class StockDetailViewModel : ObservableValidator
 
     public IRelayCommand ShowAddToPortfolioModalCommand { get; }
     public IRelayCommand CancelAddToPortfolioCommand { get; }
-    public StockDetailViewModel(IMarketDataService marketDataService, Stock stock)
+    public StockDetailViewModel(
+        IAuthService authService,
+      IMarketDataService marketDataService,
+      Stock stock,
+      FinScopeDbContext dbContext)
     {
         _marketDataService = marketDataService;
+        _authService = authService;
+        _dbContext = dbContext;
         Stock = stock;
 
 
@@ -104,12 +115,107 @@ public partial class StockDetailViewModel : ObservableValidator
     }
 
     [RelayCommand]
-    private void AddToPortfolio()
+    private async Task AddToPortfolioAsync()
     {
-        // Здесь логика добавления в портфель
-        Debug.WriteLine($"Добавлено {AddStockCount} акций {Stock.Symbol} в портфель");
+        if (AddStockCount <= 0)
+            return;
 
-        // Закрыть модальное окно после подтверждения
-        IsAddToPortfolioModalVisible = false;
-    }
+        try
+        {
+            var currentUser = _authService.CurrentUser;
+            if (currentUser == null)
+            {
+                return;
+            }
+
+            // Начинаем транзакцию
+            using var transaction = await _dbContext.Database.BeginTransactionAsync();
+
+            try
+            {
+                // Получаем актуальные данные пользователя с блокировкой для обновления
+                var user = await _dbContext.Users
+                    .FirstOrDefaultAsync(u => u.Id == currentUser.Id);
+
+                if (user == null)
+                {
+                    return;
+                }
+
+                // Проверяем существование акции
+                var stock = await _dbContext.Stocks
+                    .FirstOrDefaultAsync(s => s.Symbol == Stock.Symbol);
+
+                if (stock == null)
+                {
+                    return;
+                }
+
+                // Рассчитываем общую стоимость покупки
+                var totalCost = AddStockCount * Stock.Price ?? 0m;
+
+
+
+                // Находим существующий актив в портфеле
+                var existingAsset = await _dbContext.PortfolioAssets
+                    .FirstOrDefaultAsync(p => p.UserId == user.Id && p.StockId == stock.Id);
+
+                if (existingAsset != null)
+                {
+                    // Обновляем существующий актив
+                    var totalOldValue = existingAsset.Quantity * existingAsset.AvgPrice;
+                    var totalNewValue = AddStockCount * Stock.Price.Value;
+
+                    existingAsset.Quantity += AddStockCount;
+                    existingAsset.AvgPrice = (totalOldValue + totalNewValue) / existingAsset.Quantity;
+                    existingAsset.CurrentPrice = Stock.Price;
+                }
+                else
+                {
+                    // Добавляем новый актив
+                    var newAsset = new PortfolioAsset
+                    {
+                        UserId = user.Id,
+                        StockId = stock.Id,
+                        Quantity = AddStockCount,
+                        AvgPrice = Stock.Price.Value,
+                        CurrentPrice = Stock.Price
+                    };
+                    await _dbContext.PortfolioAssets.AddAsync(newAsset);
+                }
+
+                // Списываем средства со счета пользователя
+
+                // Создаем запись о транзакции
+                var transactionRecord = new Transaction
+                {
+                    ш = user.Id,
+                    StockId = stock.Id,
+                    Type = TransactionType.Buy,
+                    Quantity = AddStockCount,
+                    PricePerShare = Stock.Price.Value,
+                    TotalAmount = totalCost,
+                    TransactionDate = DateTime.UtcNow
+                };
+                await _dbContext.PortfolioTransactions.AddAsync(transactionRecord);
+
+                // Сохраняем все изменения
+                await _dbContext.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                StatusMessage = $"Успешно куплено {AddStockCount} акций {stock.Symbol}";
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                StatusMessage = $"Ошибка при покупке: {ex.Message}";
+                Debug.WriteLine($"Ошибка транзакции: {ex}");
+            }
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Ошибка: {ex.Message}";
+            Debug.WriteLine($"Ошибка: {ex}");
+        }
+}
 }

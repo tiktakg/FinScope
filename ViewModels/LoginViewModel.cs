@@ -5,6 +5,8 @@ using System.ComponentModel.DataAnnotations;
 using System;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using FinScope.Context;
+using Microsoft.EntityFrameworkCore;
 
 namespace FinScope.ViewModels
 {
@@ -47,11 +49,14 @@ namespace FinScope.ViewModels
             }
         private readonly IAuthService _authService;
         private readonly INavigationService _navigationService;
+        private readonly DbContext _dbContext;
 
         public LoginViewModel(
             IAuthService authService,
-            INavigationService navigationService)
+            INavigationService navigationService,
+          FinScopeDbContext dbContext)
         {
+            _dbContext = dbContext;
             _authService = authService;
             _navigationService = navigationService;
 
@@ -68,17 +73,18 @@ namespace FinScope.ViewModels
 
             try
             {
-                //var result = await _authService.AuthenticateAsync(Username, Password, RememberMe);
+                var result =  _authService.LoginAsync(Username, Password);
 
-                //if (result.IsSuccess)
-                //{
-                LoginSuccess?.Invoke(this, EventArgs.Empty);
+                if (result)
+                {
+                    LoginSuccess?.Invoke(this, EventArgs.Empty);
+                    _navigationService.NavigateBack();
 
-                //}
-                //else
-                //{
-                //    StatusMessage = result.ErrorMessage;
-                //}
+                }
+                else
+                {
+                    StatusMessage = "Ошибка входа";
+                }
 
             }
             catch (Exception ex)
@@ -95,7 +101,7 @@ namespace FinScope.ViewModels
         [RelayCommand]
         private void NavigateToRegister()
         {
-            _navigationService.Navigate(new RegisterView());
+            _navigationService.NavigateToRegister();
         }
     }
 }

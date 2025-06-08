@@ -1,5 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using FinScope.Enitys;
+
 //using FinScope.Core.Models;
 using FinScope.Interfaces;
 using System.Collections.ObjectModel;
@@ -68,19 +70,7 @@ namespace FinScope.ViewModels
         }
     }
 
-    public class PortfolioAsset : ObservableObject
-    {
-        public string Symbol { get; set; }
-        public string Name { get; set; }
-        public decimal Quantity { get; set; }
-        public decimal AvgPrice { get; set; }
-        public decimal CurrentPrice { get; set; }
-        public decimal Value { get; set; }
-        public decimal Profit { get; set; }
-        public decimal ProfitPercent { get; set; }
-        public string ProfitColor => ProfitPercent >= 0 ? "#FF4CAF50" : "#FFF44336";
-    }
-
+  
     public class SectorAllocation
     {
         public string Sector { get; set; }

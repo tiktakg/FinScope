@@ -4,10 +4,12 @@ using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
+using FinScope.Context;
 using FinScope.Interfaces;
 using FinScope.Services;
 using FinScope.ViewModels;
 using FinScope.Views;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace FinScope
@@ -25,8 +27,13 @@ namespace FinScope
         {
             var services = new ServiceCollection();
 
+
+            services.AddDbContext<FinScopeDbContext>(options =>
+              options.UseSqlServer("Your_Connection_String_Here"));
+
             // Сервисы
-          services.AddHttpClient<IMarketDataService, MoexMarketDataService>();
+
+            services.AddHttpClient<IMarketDataService, MoexMarketDataService>();
             services.AddSingleton<IAuthService, AuthService>();
 
             // MainWindowViewModel как Singleton
@@ -35,8 +42,16 @@ namespace FinScope
             services.AddSingleton<INavigationService>(provider =>
             {
                 var marketDataService = provider.GetRequiredService<IMarketDataService>();
+                var authService = provider.GetRequiredService<IAuthService>();
+                var dbContext = provider.GetRequiredService<FinScopeDbContext>();
                 var lazyMainVM = new Lazy<MainWindowViewModel>(() => provider.GetRequiredService<MainWindowViewModel>());
-                return new NavigationService(marketDataService, lazyMainVM);
+
+                return new NavigationService(
+                    marketDataService,
+                    authService,
+                    lazyMainVM,
+                    dbContext
+                    );
             });
 
             // Остальные ViewModels — Transient
