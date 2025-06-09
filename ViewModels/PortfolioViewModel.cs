@@ -1,76 +1,98 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using FinScope.Context;
 using FinScope.Enitys;
-
-//using FinScope.Core.Models;
 using FinScope.Interfaces;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace FinScope.ViewModels
 {
     public partial class PortfolioViewModel : ObservableObject
     {
-        //private readonly IPortfolioService _portfolioService;
-        //private readonly IMarketDataService _marketDataService;
+        private readonly FinScopeDbContext _dbContext;
+        private readonly IAuthService _authService;
 
         [ObservableProperty]
-        private decimal _totalValue;
+        private decimal totalValue;
 
         [ObservableProperty]
-        private decimal _profit;
+        private decimal profit;
 
         [ObservableProperty]
-        private decimal _profitPercent;
+        private decimal profitPercent;
 
         [ObservableProperty]
-        private ObservableCollection<PortfolioAsset> _portfolioAssets = new();
+        private ObservableCollection<PortfolioAsset> _portfolioAssets ;
 
         [ObservableProperty]
-        private ObservableCollection<SectorAllocation> _sectorAllocations = new();
-
-        public PieChartViewModel PieChartViewModel { get; }
+        private ObservableCollection<SectorAllocation> sectorAllocations = new();
 
         public string ProfitColor => ProfitPercent >= 0 ? "#FF4CAF50" : "#FFF44336";
 
+        public IAsyncRelayCommand LoadDataCommand { get; }
+
         public PortfolioViewModel(
-            //IPortfolioService portfolioService,
-            //IMarketDataService marketDataService,
-            //PieChartViewModel pieChartViewModel
-            )
+            FinScopeDbContext dbContext,
+            IAuthService authService)
         {
-            //_portfolioService = portfolioService;
-            //_marketDataService = marketDataService;
-            //PieChartViewModel = pieChartViewModel;
+            _dbContext = dbContext;
+            _authService = authService;
 
             LoadDataCommand = new AsyncRelayCommand(LoadDataAsync);
             LoadDataCommand.Execute(null);
         }
 
-        public IAsyncRelayCommand LoadDataCommand { get; }
-
         private async Task LoadDataAsync()
         {
-            // Загрузка данных портфеля
-            //var portfolio = await _portfolioService.GetPortfolioAsync();
-            //TotalValue = portfolio.TotalValue;
-            //Profit = portfolio.Profit;
-            //ProfitPercent = portfolio.ProfitPercent;
+            var userId = _authService.CurrentUser?.Id;
+            if (userId == null)
+                return;
 
-            // Загрузка активов
-            //var assets = await _portfolioService.GetAssetsAsync();
-            //PortfolioAssets = new ObservableCollection<PortfolioAsset>(assets);
+            // Загрузка активов пользователя
+            var assets = _dbContext.PortfolioAssets
+                .Where(a => a.UserId == userId)
+                .Select(a => new PortfolioAsset
+                {
+                    Id = a.Id,
+                    UserId = a.UserId,
+                    StockId = a.StockId,
+                    Stock = a.Stock,
+                    Quantity = a.Quantity,
+                    AvgPrice = a.AvgPrice,
+                    CurrentPrice = a.CurrentPrice,
+                    Profit = a.Profit,
+                    ProfitPercent = a.ProfitPercent,
+                    Value = a.Value
+                })
+                .ToList();
+
+            PortfolioAssets = new ObservableCollection<PortfolioAsset>(assets);
+
+            //// Подсчёт общей стоимости и прибыли
+            TotalValue = (decimal)PortfolioAssets.Sum(a => a.Value);
+            Profit = (decimal)PortfolioAssets.Sum(a => a.Profit);
+            ProfitPercent = TotalValue > 0 ? (Profit / TotalValue) * 100 : 0;
 
             // Загрузка распределения по секторам
-            //var allocations = await _portfolioService.GetSectorAllocationsAsync();
+            //var allocations = _dbContext.SectorAllocations
+            //    .Where(s => s.UserId == userId)
+            //    .Select(s => new SectorAllocation
+            //    {
+            //        Sector = s.Sector,
+            //        Value = s.Value,
+            //        Percentage = s.Percentage
+            //    })
+            //    .ToList();
+
             //SectorAllocations = new ObservableCollection<SectorAllocation>(allocations);
 
-            // Обновление круговой диаграммы
-            //await PieChartViewModel.LoadDataAsync(allocations);
+            // Обновление круговой диаграммы (если есть)
+            // await PieChartViewModel.LoadDataAsync(allocations);
         }
     }
 
-  
     public class SectorAllocation
     {
         public string Sector { get; set; }

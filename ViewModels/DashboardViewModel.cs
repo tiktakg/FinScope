@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using FinScope.Enitys;
 using FinScope.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -39,8 +40,8 @@ namespace FinScope.ViewModels
         [ObservableProperty]
         private ObservableCollection<Transaction> _recentTransactions = new()
         {
-            new Transaction { Date = DateTime.Now.AddDays(-1), Symbol = "AAPL", Type = "Покупка", Price = 1000.00m },
-            new Transaction { Date = DateTime.Now.AddDays(-3), Symbol = "MSFT", Type = "Продажа", Price = -750.00m }
+            //new Transaction { Date = DateTime.Now.AddDays(-1), Symbol = "AAPL", Type = "Покупка", Price = 1000.00m },
+            //new Transaction { Date = DateTime.Now.AddDays(-3), Symbol = "MSFT", Type = "Продажа", Price = -750.00m }
         };
 
         [ObservableProperty]
@@ -89,19 +90,7 @@ namespace FinScope.ViewModels
         public decimal ChangePercent { get; set; }
         public string ChangeColor => ChangePercent >= 0 ? "#FF4CAF50" : "#FFF44336";
     }
-
-    public class Transaction
-    {
-        public DateTime Date { get; set; }
-        public string Type { get; set; } = "";
-        public string Symbol { get; set; } = "";
-        public int Quantity { get; set; }
-        public decimal Price { get; set; }
-        public decimal Total => Quantity * Price;
-        public string? Exchange { get; set; }
-        public string? Sector { get; set; }
-        public string? Description { get; set; }
-    }
+  
 
 }
 

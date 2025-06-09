@@ -132,7 +132,7 @@
 									<TextBlock Text="{Binding Type}"
                                                Foreground="{Binding Type, Converter={StaticResource TypeToColorConverter}}"
                                                VerticalAlignment="Center" Grid.Column="1" Margin="5,0"/>
-									<TextBlock Text="{Binding Symbol}" Foreground="White"
+									<TextBlock Text="{Binding Stock.Symbol}" Foreground="White"
                                                VerticalAlignment="Center" Grid.Column="2" Margin="5,0"/>
 									<TextBlock Text="{Binding Quantity}" Foreground="White"
                                                VerticalAlignment="Center" Grid.Column="3" Margin="5,0"/>
@@ -153,6 +153,7 @@
 					</ItemsControl>
 				</StackPanel>
 			</Border>
+			
 		</StackPanel>
 	</ScrollViewer>
 </UserControl>

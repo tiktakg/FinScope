@@ -24,6 +24,8 @@ public partial class Stock
     public virtual ICollection<PortfolioAsset> PortfolioAssets { get; set; } = new List<PortfolioAsset>();
 
     public virtual ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();
+
+    public string ChangeColor => ChangePercent >= 0 ? "#FF4CAF50" : "#FFF44336";
 }
 
 

@@ -189,32 +189,29 @@ public partial class StockDetailViewModel : ObservableValidator
                 // Создаем запись о транзакции
                 var transactionRecord = new Transaction
                 {
-                    ш = user.Id,
+                    UserId = user.Id,
                     StockId = stock.Id,
-                    Type = TransactionType.Buy,
+                    Type = "Покупка",
                     Quantity = AddStockCount,
-                    PricePerShare = Stock.Price.Value,
-                    TotalAmount = totalCost,
-                    TransactionDate = DateTime.UtcNow
+                    Price = Stock.Price.Value,
+                    Total = totalCost,
+                    Date = DateTime.UtcNow
                 };
-                await _dbContext.PortfolioTransactions.AddAsync(transactionRecord);
+                await _dbContext.Transactions.AddAsync(transactionRecord);
 
                 // Сохраняем все изменения
                 await _dbContext.SaveChangesAsync();
                 await transaction.CommitAsync();
 
-                StatusMessage = $"Успешно куплено {AddStockCount} акций {stock.Symbol}";
             }
             catch (Exception ex)
             {
                 await transaction.RollbackAsync();
-                StatusMessage = $"Ошибка при покупке: {ex.Message}";
                 Debug.WriteLine($"Ошибка транзакции: {ex}");
             }
         }
         catch (Exception ex)
         {
-            StatusMessage = $"Ошибка: {ex.Message}";
             Debug.WriteLine($"Ошибка: {ex}");
         }
 }
