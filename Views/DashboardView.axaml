@@ -7,6 +7,7 @@
              xmlns:v="clr-namespace:FinScope.Views.Controls"
              x:Class="FinScope.DashboardView"
              x:DataType="vm:DashboardViewModel"
+			    x:CompileBindings="False"
              d:DesignWidth="1200" d:DesignHeight="800">
 	<UserControl.Styles>
 		<!-- Наследуем стили из MainWindow -->

@@ -82,7 +82,7 @@ namespace FinScope.Services
         }
         public void NavigateBack()
         {
-            var vm = new DashboardViewModel(_marketDataService);
+            var vm = new DashboardViewModel(_marketDataService,_authService, _dbContext);
             var view = new DashboardView
             {
                 DataContext = vm

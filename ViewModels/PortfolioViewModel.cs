@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using FinScope.Context;
 using FinScope.Enitys;
 using FinScope.Interfaces;
+using FinScope.Services;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -24,13 +25,20 @@ namespace FinScope.ViewModels
         private decimal profitPercent;
 
         [ObservableProperty]
-        private ObservableCollection<PortfolioAsset> _portfolioAssets ;
+        private ObservableCollection<PortfolioAsset> _portfolioAssets;
+
+        [ObservableProperty]
+        private bool isAddToPortfolioModalVisible;
+
+        [ObservableProperty]
+        private int addStockCount;
 
         [ObservableProperty]
         private ObservableCollection<SectorAllocation> sectorAllocations = new();
 
         public string ProfitColor => ProfitPercent >= 0 ? "#FF4CAF50" : "#FFF44336";
-
+        public IRelayCommand ShowAddToPortfolioModalCommand { get; }
+        public IRelayCommand CancelAddToPortfolioCommand { get; }
         public IAsyncRelayCommand LoadDataCommand { get; }
 
         public PortfolioViewModel(
@@ -42,6 +50,9 @@ namespace FinScope.ViewModels
 
             LoadDataCommand = new AsyncRelayCommand(LoadDataAsync);
             LoadDataCommand.Execute(null);
+
+            ShowAddToPortfolioModalCommand = new RelayCommand(() => IsAddToPortfolioModalVisible = true);
+            CancelAddToPortfolioCommand = new RelayCommand(() => IsAddToPortfolioModalVisible = false);
         }
 
         private async Task LoadDataAsync()
@@ -91,7 +102,24 @@ namespace FinScope.ViewModels
             // Обновление круговой диаграммы (если есть)
             // await PieChartViewModel.LoadDataAsync(allocations);
         }
+        private async void ShowStockDetails(Stock stock)
+        {
+        
+
+
+        }
+
+        [RelayCommand]
+        private async void SellStock(PortfolioAsset profileAsset)
+        {
+            if (profileAsset == null)
+                return;
+            IsAddToPortfolioModalVisible = true;
+            var test = 5;
+
+        }
     }
+
 
     public class SectorAllocation
     {

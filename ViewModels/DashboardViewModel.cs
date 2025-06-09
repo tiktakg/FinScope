@@ -1,12 +1,13 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using FinScope.Context;
 using FinScope.Enitys;
 using FinScope.Interfaces;
+using FinScope.Services;
+using Microsoft.EntityFrameworkCore;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using static MoexMarketDataService;
 
@@ -14,52 +15,41 @@ namespace FinScope.ViewModels
 {
     public partial class DashboardViewModel : ObservableObject
     {
-        // private readonly IPortfolioService _portfolioService;
+        private readonly IAuthService _authService;
+        private readonly FinScopeDbContext _dbContext;
         private readonly IMarketDataService _marketDataService;
 
         [ObservableProperty]
-        private decimal _portfolioBalance = 12500.75m;
+        private decimal _portfolioBalance;
 
         [ObservableProperty]
-        private decimal _balanceChangePercent = 2.34m;
+        private decimal _balanceChangePercent;
 
         [ObservableProperty]
-        private decimal _totalProfit = 1250.50m;
+        private decimal _totalProfit;
 
         [ObservableProperty]
-        private decimal _profitPercent = 12.5m;
+        private decimal _profitPercent;
 
         [ObservableProperty]
-        private ObservableCollection<Asset> _topAssets = new()
-        {
-            new Asset { Symbol = "AAPL", Value = 4500.00m, ChangePercent = 1.23m },
-            new Asset { Symbol = "MSFT", Value = 3800.00m, ChangePercent = -0.45m },
-            new Asset { Symbol = "GOOGL", Value = 2200.00m, ChangePercent = 3.21m }
-        };
+        private ObservableCollection<PortfolioAsset> _topAssets = new();
 
         [ObservableProperty]
-        private ObservableCollection<Transaction> _recentTransactions = new()
-        {
-            //new Transaction { Date = DateTime.Now.AddDays(-1), Symbol = "AAPL", Type = "Покупка", Price = 1000.00m },
-            //new Transaction { Date = DateTime.Now.AddDays(-3), Symbol = "MSFT", Type = "Продажа", Price = -750.00m }
-        };
+        private ObservableCollection<Transaction> _recentTransactions = new();
 
         [ObservableProperty]
-        private ObservableCollection<NewsArticle> _marketNews = new()
-        {
-            new NewsArticle { Title = "ФРС оставляет ставки без изменений", Source = "Bloomberg", Summary = "Федеральная резервная система приняла решение..." },
-            new NewsArticle { Title = "Apple представляет новые продукты", Source = "CNBC", Summary = "Компания Apple анонсировала новую линейку..." }
-        };
+        private ObservableCollection<NewsArticle> _marketNews = new();
 
         public string BalanceChangeColor => BalanceChangePercent >= 0 ? "#FF4CAF50" : "#FFF44336";
         public string ProfitColor => ProfitPercent >= 0 ? "#FF4CAF50" : "#FFF44336";
 
         public DashboardViewModel(
-            //IPortfolioService portfolioService,
-            IMarketDataService marketDataService
-            )
+            IMarketDataService marketDataService,
+       IAuthService authService,
+     FinScopeDbContext dbContext)
         {
-            //_portfolioService = portfolioService;
+            _dbContext = dbContext;
+            _authService = authService;
             _marketDataService = marketDataService;
 
             LoadDataCommand = new AsyncRelayCommand(LoadDataAsync);
@@ -70,28 +60,77 @@ namespace FinScope.ViewModels
 
         private async Task LoadDataAsync()
         {
-            await LoadNewsAsync();
+            await Task.WhenAll(
+                LoadPortfolioAsync(),
+                LoadTransactionsAsync(),
+                LoadNewsAsync());
         }
-        private async Task LoadNewsAsync()
+
+        private async Task LoadPortfolioAsync()
         {
-            var newsItems = await _marketDataService.GetNewsAsync("Sber");
-            _marketNews.Clear();
-            foreach (var n in newsItems)
+            var userId = _authService.CurrentUser?.Id;
+            if (userId == null)
+                return;
+
+            var assets = _dbContext.PortfolioAssets
+                  .Where(a => a.UserId == userId)
+                  .Select(a => new PortfolioAsset
+                  {
+                      Id = a.Id,
+                      UserId = a.UserId,
+                      StockId = a.StockId,
+                      Stock = a.Stock,
+                      Quantity = a.Quantity,
+                      AvgPrice = a.AvgPrice,
+                      CurrentPrice = a.CurrentPrice,
+                      Profit = a.Profit,
+                      ProfitPercent = a.ProfitPercent,
+                      Value = a.Value
+                  })
+                  .ToList();
+
+            if (assets?.Any() != true)
+                return;
+
+            // Обновляем топ-активы
+            TopAssets.Clear();
+            foreach (var asset in assets.OrderByDescending(a => a.Value).Take(5))
+                TopAssets.Add(asset);
+
+            // Баланс, прибыль и проценты
+            PortfolioBalance = (decimal)assets.Sum(a => a.Value);
+            TotalProfit = (decimal)assets.Sum(a => a.Profit);
+            ProfitPercent = PortfolioBalance > 0 ? (TotalProfit / (PortfolioBalance - TotalProfit)) * 100 : 0;
+
+        }
+
+        private async Task LoadTransactionsAsync()
+        {
+            var userId = _authService.CurrentUser?.Id;
+            if (userId == null)
+                return;
+
+            var transactions = await _dbContext.Transactions
+                 .Include(t => t.Stock)
+            .OrderByDescending(t => t.Date)
+                 .Where(t => t.UserId == _authService.CurrentUser.Id)
+                 .ToListAsync();
+
+            RecentTransactions.Clear();
+            foreach (var tx in transactions
+                .OrderByDescending(t => t.Date)
+                .Take(10))
             {
-                _marketNews.Add(n);
+                RecentTransactions.Add(tx);
             }
         }
-    }
 
-    public class Asset : ObservableObject
-    {
-        public string Symbol { get; set; }
-        public decimal Value { get; set; }
-        public decimal ChangePercent { get; set; }
-        public string ChangeColor => ChangePercent >= 0 ? "#FF4CAF50" : "#FFF44336";
+        private async Task LoadNewsAsync()
+        {
+            var newsItems = await _marketDataService.GetNewsAsync("MOEX"); // можно подставить индекс или главный актив
+            MarketNews.Clear();
+            foreach (var n in newsItems)
+                MarketNews.Add(n);
+        }
     }
-  
-
 }
-
-
