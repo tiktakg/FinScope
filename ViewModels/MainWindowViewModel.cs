@@ -56,8 +56,8 @@ namespace FinScope.ViewModels
             //StockDetailViewModel stockDetailViewModel,
             PortfolioViewModel portfolioViewModel,
             TransactionsViewModel transactionsViewModel,
-            NewsViewModel newsViewModel
-            //SettingsViewModel settingsViewModel
+            NewsViewModel newsViewModel,
+            UserProfileViewModel settingsViewModel
             )
         {
             _authService = authService;
@@ -70,13 +70,14 @@ namespace FinScope.ViewModels
             PortfolioViewModel = portfolioViewModel;
             TransactionsViewModel = transactionsViewModel;
             NewsViewModel = newsViewModel;
-            //SettingsViewModel = settingsViewModel;
+            SettingsViewModel = settingsViewModel;
 
+            CurrentView = new LoginView { DataContext = LoginViewModel };
             // Подписка на событие успешной авторизации
             LoginViewModel.LoginSuccess += OnLoginSuccess;
 
             // Инициализация начального View
-            CurrentView = new LoginView { DataContext = LoginViewModel };
+      
         }
 
         private void OnLoginSuccess(object sender, EventArgs e)
@@ -122,11 +123,11 @@ namespace FinScope.ViewModels
             CurrentView = new NewsView();
         }
 
-        //[RelayCommand]
-        //private void NavigateToSettings()
-        //{
-        //    CurrentView = new SettingsView();
-        //}
+        [RelayCommand]
+        private void NavigateToSettings()
+        {
+            CurrentView = new UserProfileView();
+        }
 
         [RelayCommand]
         private void Logout()

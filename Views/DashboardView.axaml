@@ -5,6 +5,7 @@
              mc:Ignorable="d" 
 			 xmlns:vm="clr-namespace:FinScope.ViewModels"
              xmlns:v="clr-namespace:FinScope.Views.Controls"
+			 xmlns:ScottPlot="clr-namespace:ScottPlot.Avalonia;assembly=ScottPlot.Avalonia"
              x:Class="FinScope.DashboardView"
              x:DataType="vm:DashboardViewModel"
 			    x:CompileBindings="False"
@@ -71,25 +72,50 @@
 				<Border Classes="card" Grid.Column="0" Grid.Row="0" Grid.RowSpan="2">
 					<StackPanel>
 						<TextBlock Text="Динамика портфеля" FontSize="16" Margin="0 0 0 10"/>
-						<!-- Здесь будет ChartControl -->
-						<TextBlock Text="[График будет здесь]" HorizontalAlignment="Center"/>
+						<ScottPlot:AvaPlot Name="AvaPlot" Grid.Column="2" Height="500"/>
 					</StackPanel>
+				
 				</Border>
 
 				<!-- Топ активов -->
 				<Border Classes="card" Grid.Column="1" Grid.Row="0">
 					<StackPanel>
 						<TextBlock Text="Топ активов" FontSize="16" Margin="0 0 0 10"/>
+						<!-- Заголовки таблицы -->
+						<Grid Background="#222" Height="36">
+							<Grid.ColumnDefinitions>
+								<ColumnDefinition Width="100"/>
+								<ColumnDefinition Width="80"/>
+								<ColumnDefinition Width="100"/>
+								<ColumnDefinition Width="100"/>
+							
+								<!-- Для кнопки -->
+							</Grid.ColumnDefinitions>
+							<TextBlock Text="Тикер" Foreground="White" VerticalAlignment="Center" Grid.Column="0" Margin="5,0" />
+							<TextBlock Text="Кол-во" Foreground="White" VerticalAlignment="Center" Grid.Column="1" Margin="5,0" />
+							<TextBlock Text="Цена" Foreground="White" VerticalAlignment="Center" Grid.Column="2" Margin="5,0" />
+							<TextBlock Text="Сумма" Foreground="White" VerticalAlignment="Center" Grid.Column="3" Margin="5,0" />
+							
+						</Grid>
 						<ItemsControl ItemsSource="{Binding TopAssets}">
 							<ItemsControl.ItemTemplate>
 								<DataTemplate>
-									<Grid ColumnDefinitions="40*,30*,30*" Margin="0 5">
-										<TextBlock Text="{Binding Symbol}" Grid.Column="0"/>
-										<TextBlock Text="{Binding Value, StringFormat='{}{0:C}'}"
-                                                   Grid.Column="1" HorizontalAlignment="Right"/>
-										<TextBlock Text="{Binding ChangePercent, StringFormat='{}{0:+0.00;-0.00;0.00}%'}"
-                                                   Grid.Column="2" HorizontalAlignment="Right"
-                                                   Foreground="{Binding ChangeColor}"/>
+									<Grid Margin="0 5"
+										   Background="#1E1E1E">
+											<Grid.ColumnDefinitions>
+												<ColumnDefinition Width="100"/>
+												<ColumnDefinition Width="80"/>
+												<ColumnDefinition Width="100"/>
+												<ColumnDefinition Width="100"/>
+											</Grid.ColumnDefinitions>
+										<TextBlock Text="{Binding Stock.Symbol}" Foreground="White"
+															   VerticalAlignment="Center" Grid.Column="0" Margin="5,0"/>
+										<TextBlock Text="{Binding Quantity, StringFormat='{}{0:F0}'}" Foreground="White"
+												   VerticalAlignment="Center" Grid.Column="1" Margin="5,0"/>
+										<TextBlock Text="{Binding Stock.Price, StringFormat='{}{0:C2}'}" Foreground="White"
+												   VerticalAlignment="Center" Grid.Column="2" Margin="5,0"/>
+										<TextBlock Text="{Binding Value, StringFormat='{}{0:C2}'}" Foreground="White"
+												   VerticalAlignment="Center" Grid.Column="3" Margin="5,0"/>
 									</Grid>
 								</DataTemplate>
 							</ItemsControl.ItemTemplate>

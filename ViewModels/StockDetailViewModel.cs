@@ -209,6 +209,7 @@ public partial class StockDetailViewModel : ObservableValidator
                 await transaction.RollbackAsync();
                 Debug.WriteLine($"Ошибка транзакции: {ex}");
             }
+            IsAddToPortfolioModalVisible = false;
         }
         catch (Exception ex)
         {

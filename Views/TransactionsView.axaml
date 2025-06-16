@@ -84,7 +84,13 @@
 								Width="150"
 								Background="#444"
 								Foreground="White"
-								Command="{Binding ResetFilterCommand}"/>
+								Command="{Binding ResetFilterCommand}"
+								Margin="0,0,10,0"/>
+							<Button Content="Создать очет"
+								Width="150"
+								Background="#444"
+								Foreground="White"
+								Command="{Binding GenerateReportCommand}"/>
 					</WrapPanel>
 				</StackPanel>
 			</Border>

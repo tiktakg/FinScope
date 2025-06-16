@@ -11,12 +11,14 @@ using FinScope.ViewModels;
 using FinScope.Views;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using OfficeOpenXml;
 
 namespace FinScope
 {
     public partial class App : Application
     {
         public IServiceProvider Services { get; private set; }
+
 
         public override void Initialize()
         {
@@ -27,6 +29,8 @@ namespace FinScope
         {
             var services = new ServiceCollection();
 
+     
+               // Для коммерческого использования
 
             services.AddDbContext<FinScopeDbContext>(options =>
               options.UseSqlServer("Your_Connection_String_Here"));
@@ -63,6 +67,7 @@ namespace FinScope
             services.AddTransient<TransactionsViewModel>();
             services.AddTransient<NewsViewModel>();
             services.AddTransient<StockDetailViewModel>();
+            services.AddTransient<UserProfileViewModel>();
 
             // View'ы
             services.AddTransient<MainWindow>();
@@ -74,6 +79,7 @@ namespace FinScope
             services.AddTransient<TransactionsView>();
             services.AddTransient<NewsView>();
             services.AddTransient<StockDetailView>();
+            services.AddTransient<UserProfileView>();
 
             // Build ServiceProvider
             Services = services.BuildServiceProvider();

@@ -9,7 +9,7 @@
         x:Class="FinScope.Views.MainWindow"
         x:CompileBindings="False"
         x:DataType="vm:MainWindowViewModel"
-        Icon="/Assets/avalonia-logo.ico"
+        Icon="/Assets/avalonia-logo.png"
         Title="FinScope"
         Width="1200" Height="800"
         MinWidth="1024" MinHeight="768">
@@ -33,7 +33,7 @@
 			<Setter Property="HorizontalAlignment" Value="Left"/>
 			<Setter Property="HorizontalContentAlignment" Value="Left"/>
 			<Setter Property="Padding" Value="15,10"/>
-			<Setter Property="FontSize" Value="14"/>
+			<Setter Property="FontSize" Value="15"/>
 		</Style>
 
 		<Style Selector="Button.NavButton:pointerover">
@@ -75,44 +75,52 @@
 			<Grid RowDefinitions="Auto,*,Auto">
 				<!-- Логотип -->
 				<StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="10" Margin="20,25">
-					<Image Source="/Assets/avalonia-logo.ico" Width="32" Height="32"/>
+					<Image Source="/Assets/avalonia-logo.png" Width="80" Height="80"/>
 					<TextBlock Text="FinScope"
-                               FontSize="20"
+                               FontSize="22"
                                FontWeight="Bold"
                                Foreground="{DynamicResource SystemAccentColorBrush}"
                                VerticalAlignment="Center"/>
 				</StackPanel>
 
 				<!-- Навигация -->
+				<!-- Навигация -->
 				<ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
 					<StackPanel Spacing="5" Margin="10,0">
 						<Button Command="{Binding NavigateToDashboardCommand}"
-                                Content="Главная"
-                                Classes="NavButton"/>
+								Content="Главная"
+								Classes="NavButton"
+								IsEnabled="{Binding IsAuthenticated}"/>
 
 						<Button Command="{Binding NavigateToMarketOverviewCommand}"
-                                Content="Рынок"
-                                Classes="NavButton"/>
+								Content="Рынок"
+								Classes="NavButton"
+								IsEnabled="{Binding IsAuthenticated}"/>
 
 						<Button Command="{Binding NavigateToPortfolioCommand}"
-                                Content="Портфель"
-                                Classes="NavButton"/>
+								Content="Портфель"
+								Classes="NavButton"
+								IsEnabled="{Binding IsAuthenticated}"/>
 
 						<Button Command="{Binding NavigateToTransactionsCommand}"
-                                Content="Транзакции"
-                                Classes="NavButton"/>
+								Content="Транзакции"
+								Classes="NavButton"
+								IsEnabled="{Binding IsAuthenticated}"/>
 
 						<Button Command="{Binding NavigateToNewsCommand}"
-                                Content="Новости"
-                                Classes="NavButton"/>
+								Content="Новости"
+								Classes="NavButton"
+								IsEnabled="{Binding IsAuthenticated}"/>
 					</StackPanel>
 				</ScrollViewer>
 
 				<!-- Нижняя часть меню -->
 				<StackPanel Grid.Row="2" Spacing="5" Margin="10,0,10,20">
-					<Button Command="{Binding NavigateToSettingsCommand}"
-                            Content="Настройки"
-                            Classes="NavButton"/>
+					<!-- 	<Button Command="{Binding NavigateToSettingsCommand}"
+							Content="Профиль"
+							Classes="NavButton"
+							IsEnabled="{Binding IsAuthenticated}"/> -->
+
 
 					<Button Command="{Binding LogoutCommand}"
                             Content="Выход"

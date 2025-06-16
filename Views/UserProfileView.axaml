@@ -1,0 +1,123 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             xmlns:vm="clr-namespace:FinScope.ViewModels"
+             x:Class="FinScope.UserProfileView"
+             x:DataType="vm:UserProfileViewModel"
+             x:CompileBindings="False"
+             d:DesignWidth="1200" d:DesignHeight="800">
+
+	<UserControl.Styles>
+		<!-- Наследуем стили из DashboardView -->
+		<Style Selector="TextBlock.header">
+			<Setter Property="FontSize" Value="24"/>
+			<Setter Property="FontWeight" Value="Bold"/>
+			<Setter Property="Margin" Value="0 0 0 15"/>
+			<Setter Property="Foreground" Value="{DynamicResource SystemAccentColorBrush}"/>
+		</Style>
+
+		<Style Selector="Border.card">
+			<Setter Property="Background" Value="#FF252525"/>
+			<Setter Property="BorderBrush" Value="#FF404040"/>
+			<Setter Property="BorderThickness" Value="1"/>
+			<Setter Property="CornerRadius" Value="8"/>
+			<Setter Property="Padding" Value="15"/>
+			<Setter Property="Margin" Value="10"/>
+		</Style>
+
+		<Style Selector="TextBlock.label">
+			<Setter Property="FontSize" Value="14"/>
+			<Setter Property="Foreground" Value="#FFA0A0A0"/>
+			<Setter Property="Margin" Value="0 5 0 0"/>
+		</Style>
+
+		<Style Selector="TextBlock.value">
+			<Setter Property="FontSize" Value="16"/>
+			<Setter Property="Foreground" Value="White"/>
+			<Setter Property="Margin" Value="0 5 0 10"/>
+		</Style>
+
+		<Style Selector="Button.profile-action">
+			<Setter Property="Margin" Value="0 10 0 0"/>
+			<Setter Property="Padding" Value="10 5"/>
+			<Setter Property="MinWidth" Value="120"/>
+		</Style>
+	</UserControl.Styles>
+
+	<ScrollViewer>
+		<StackPanel Margin="20">
+			<!-- Заголовок -->
+			<TextBlock Text="Профиль пользователя" Classes="header"/>
+
+			<!-- Основная информация -->
+			<WrapPanel>
+				<!-- Карточка персональных данных -->
+				<Border Classes="card" Width="400">
+					<StackPanel>
+						<TextBlock Text="Персональные данные" FontSize="18" Margin="0 0 0 10"/>
+
+						<TextBlock Text="Имя пользователя" Classes="label"/>
+						<TextBlock Text="{Binding Username}" Classes="value"/>
+
+						<TextBlock Text="Email" Classes="label"/>
+						<TextBlock Text="{Binding Email}" Classes="value"/>
+
+						<TextBlock Text="Пароль" Classes="label"/>
+						<TextBlock Text="••••••••" Classes="value"/>
+
+						<TextBlock Text="Дата регистрации" Classes="label"/>
+						<TextBlock Text="{Binding RegistrationDate, StringFormat='{}{0:dd.MM.yyyy}'}" Classes="value"/>
+
+						<Button Content="Изменить данные" Classes="profile-action"
+                                Command="{Binding EditProfileCommand}"/>
+					</StackPanel>
+				</Border>
+
+			
+			</WrapPanel>
+
+			<!-- Статистика портфеля -->
+			<Border Classes="card" Margin="0 20 0 0">
+				<StackPanel>
+					<TextBlock Text="Статистика портфеля" FontSize="18" Margin="0 0 0 10"/>
+
+					<Grid ColumnDefinitions="*,*,*,*" Margin="0 10">
+						<!-- Первая сделка -->
+						<StackPanel Grid.Column="0">
+							<TextBlock Text="Первая сделка" Classes="label"/>
+							<TextBlock Text="{Binding FirstTransactionDate, StringFormat='{}{0:dd.MM.yyyy}'}" Classes="value"/>
+						</StackPanel>
+
+						<!-- Последняя сделка -->
+						<StackPanel Grid.Column="1">
+							<TextBlock Text="Последняя сделка" Classes="label"/>
+							<TextBlock Text="{Binding LastTransactionDate, StringFormat='{}{0:dd.MM.yyyy}'}" Classes="value"/>
+						</StackPanel>
+
+						<!-- Всего сделок -->
+						<StackPanel Grid.Column="2">
+							<TextBlock Text="Всего сделок" Classes="label"/>
+							<TextBlock Text="{Binding TotalTransactions}" Classes="value"/>
+						</StackPanel>
+
+						<!-- Активных активов -->
+						<StackPanel Grid.Column="3">
+							<TextBlock Text="Активных активов" Classes="label"/>
+							<TextBlock Text="{Binding ActiveAssets}" Classes="value"/>
+						</StackPanel>
+					</Grid>
+
+					<!-- График активности -->
+					<TextBlock Text="Активность по месяцам" Classes="label" Margin="0 20 0 5"/>
+					<Border Height="200" Background="#FF1E1E1E" CornerRadius="4">
+						<!-- Здесь можно разместить график активности -->
+					</Border>
+				</StackPanel>
+			</Border>
+
+		
+		</StackPanel>
+	</ScrollViewer>
+</UserControl>

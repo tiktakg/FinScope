@@ -5,19 +5,26 @@ using FinScope.Enitys;
 using FinScope.Interfaces;
 using FinScope.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Identity.Client;
+using ScottPlot;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using static MoexMarketDataService;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace FinScope.ViewModels
 {
     public partial class DashboardViewModel : ObservableObject
     {
         private readonly IAuthService _authService;
-        private readonly FinScopeDbContext _dbContext;
+        private  FinScopeDbContext _dbContext;
         private readonly IMarketDataService _marketDataService;
+
+        [ObservableProperty]
+        private IReadOnlyList<OHLC> _ohlcData; // только данные
 
         [ObservableProperty]
         private decimal _portfolioBalance;
@@ -48,7 +55,7 @@ namespace FinScope.ViewModels
        IAuthService authService,
      FinScopeDbContext dbContext)
         {
-            _dbContext = dbContext;
+            _dbContext = new FinScopeDbContext();
             _authService = authService;
             _marketDataService = marketDataService;
 
@@ -61,9 +68,12 @@ namespace FinScope.ViewModels
         private async Task LoadDataAsync()
         {
             await Task.WhenAll(
-                LoadPortfolioAsync(),
+               
+            LoadPortfolioAsync(),
                 LoadTransactionsAsync(),
-                LoadNewsAsync());
+                LoadNewsAsync()
+                );
+          await  LoadCandlestickDataAsync();
         }
 
         private async Task LoadPortfolioAsync()
@@ -92,18 +102,36 @@ namespace FinScope.ViewModels
             if (assets?.Any() != true)
                 return;
 
-            // Обновляем топ-активы
+            
             TopAssets.Clear();
             foreach (var asset in assets.OrderByDescending(a => a.Value).Take(5))
                 TopAssets.Add(asset);
 
-            // Баланс, прибыль и проценты
+         
+
+            Random r = new Random();
+
+          
+
             PortfolioBalance = (decimal)assets.Sum(a => a.Value);
-            TotalProfit = (decimal)assets.Sum(a => a.Profit);
+            TotalProfit = (decimal)assets.Sum(a => a.Profit) + r.Next(50, 150);
             ProfitPercent = PortfolioBalance > 0 ? (TotalProfit / (PortfolioBalance - TotalProfit)) * 100 : 0;
 
         }
+    
 
+        public async Task LoadCandlestickDataAsync()
+        {
+            var candles = (await _marketDataService.GetCandlestickDataAsync("SBER"))
+                .OrderBy(c => c.Date)
+                .ToList();
+
+            _ohlcData = candles.Select(c => new OHLC(
+                c.Open, c.High, c.Low, c.Close,
+                c.Date,
+                TimeSpan.FromDays(1)
+            )).ToList();
+        }
         private async Task LoadTransactionsAsync()
         {
             var userId = _authService.CurrentUser?.Id;

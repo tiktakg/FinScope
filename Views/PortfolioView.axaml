@@ -108,17 +108,17 @@
 											
 											<TextBlock Text="{Binding Stock.Symbol}" Foreground="White"
 													   VerticalAlignment="Center" Grid.Column="0" Margin="5,0"/>
-											<TextBlock Text="{Binding Quantity}" Foreground="White"
+											<TextBlock Text="{Binding Quantity, StringFormat='{}{0:F0}'}" Foreground="White"
 													   VerticalAlignment="Center" Grid.Column="1" Margin="5,0"/>
 											<TextBlock Text="{Binding Stock.Price, StringFormat='{}{0:C2}'}" Foreground="White"
 													   VerticalAlignment="Center" Grid.Column="2" Margin="5,0"/>
-											<TextBlock Text="{Binding Stock.Volume, StringFormat='{}{0:C2}'}" Foreground="White"
+											<TextBlock Text="{Binding Value, StringFormat='{}{0:C2}'}" Foreground="White"
 													   VerticalAlignment="Center" Grid.Column="3" Margin="5,0"/>
 											<Button Content="Продать"
 													Grid.Column="6"
 													Width="200"
 													HorizontalContentAlignment="Center"
-													Command="{Binding DataContext.SellStockCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+													Command="{Binding DataContext.ShowSellStockModalCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
 													CommandParameter="{Binding}"
 													Margin="5,0"/>
 										</Grid>
@@ -172,7 +172,7 @@
 							BorderBrush="#666"/>
 					<Button Content="Продать"
 							Width="90"
-							Command="{Binding AddToPortfolioCommand}"
+							Command="{Binding SellStockCommand}"
 							Background="#28a745"
 							Foreground="White"
 							BorderBrush="#1e7e34"/>

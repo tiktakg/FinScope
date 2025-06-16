@@ -12,6 +12,8 @@ namespace FinScope.ViewModels
 {
     public partial class LoginViewModel : ObservableValidator
     {
+        private readonly MainWindowViewModel _mainWindowViewModel;
+
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(CanLogin))]
         [Required(ErrorMessage = "Email или имя пользователя обязательно")]
@@ -33,7 +35,12 @@ namespace FinScope.ViewModels
         [ObservableProperty]
         private string _statusMessage = string.Empty;
 
-        public event EventHandler LoginSuccess;
+        // Замените обычное событие на WeakEventManager
+        public event EventHandler LoginSuccess
+        {
+            add => WeakEventManager<LoginViewModel, EventArgs>.AddHandler(this, nameof(LoginSuccess), value);
+            remove => WeakEventManager<LoginViewModel, EventArgs>.RemoveHandler(this, nameof(LoginSuccess), value);
+        }
 
         public bool CanLogin
         {

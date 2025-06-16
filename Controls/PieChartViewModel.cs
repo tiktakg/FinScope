@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using FinScope.Enitys;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,15 +17,15 @@ namespace FinScope.ViewModels
         {
             // Преобразование данных для диаграммы
             var segments = new List<ChartSegment>();
-            foreach (var allocation in allocations)
-            {
-                segments.Add(new ChartSegment
-                {
-                    Label = allocation.Sector,
-                    Value = allocation.Value,
-                    Color = GetSectorColor(allocation.Sector)
-                });
-            }
+            //foreach (var allocation in allocations)
+            //{
+            //    segments.Add(new ChartSegment
+            //    {
+            //        Label = allocation.Sector,
+            //        Value = allocation.Value,
+            //        Color = GetSectorColor(allocation.Sector)
+            //    });
+            //}
 
             Segments = segments;
         }
