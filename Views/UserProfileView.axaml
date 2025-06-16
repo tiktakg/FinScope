@@ -2,6 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+			  xmlns:ScottPlot="clr-namespace:ScottPlot.Avalonia;assembly=ScottPlot.Avalonia"
              mc:Ignorable="d"
              xmlns:vm="clr-namespace:FinScope.ViewModels"
              x:Class="FinScope.UserProfileView"
@@ -58,24 +59,49 @@
 					<StackPanel>
 						<TextBlock Text="Персональные данные" FontSize="18" Margin="0 0 0 10"/>
 
-						<TextBlock Text="Имя пользователя" Classes="label"/>
-						<TextBlock Text="{Binding Username}" Classes="value"/>
+						<!-- Режим просмотра -->
+						<StackPanel x:Name="ViewModePanel">
+							<TextBlock Text="Имя пользователя" Classes="label"/>
+							<TextBlock Text="{Binding Username}" Classes="value"/>
 
-						<TextBlock Text="Email" Classes="label"/>
-						<TextBlock Text="{Binding Email}" Classes="value"/>
+							<TextBlock Text="Email" Classes="label"/>
+							<TextBlock Text="{Binding Email}" Classes="value"/>
 
-						<TextBlock Text="Пароль" Classes="label"/>
-						<TextBlock Text="••••••••" Classes="value"/>
+							<TextBlock Text="Пароль" Classes="label"/>
+							<StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+								<TextBlock Text="••••••••" Classes="value" VerticalAlignment="Center"/>
+								<Button Content="Сбросить пароль"
+										Classes="profile-action"
+										Margin="10,0,0,0"
+										Padding="8,2"
+										Command="{Binding ResetPasswordCommand}"/>
+							</StackPanel>
 
-						<TextBlock Text="Дата регистрации" Classes="label"/>
-						<TextBlock Text="{Binding RegistrationDate, StringFormat='{}{0:dd.MM.yyyy}'}" Classes="value"/>
+							<TextBlock Text="Дата регистрации" Classes="label"/>
+							<TextBlock Text="{Binding RegistrationDate, StringFormat='{}{0:dd.MM.yyyy}'}" Classes="value"/>
 
-						<Button Content="Изменить данные" Classes="profile-action"
-                                Command="{Binding EditProfileCommand}"/>
+							<Button Content="Изменить данные" Classes="profile-action"
+									Command="{Binding EditProfileCommand}"/>
+						</StackPanel>
+
+						<!-- Режим редактирования -->
+						<StackPanel x:Name="EditModePanel" IsVisible="False">
+							<TextBlock Text="Имя пользователя" Classes="label"/>
+							<TextBox Text="{Binding EditableUsername}" Watermark="Введите имя" Margin="0 5 0 10"/>
+
+							<TextBlock Text="Email" Classes="label"/>
+							<TextBox Text="{Binding EditableEmail}" Watermark="Введите email" Margin="0 5 0 10"/>
+
+							<StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0 10 0 0">
+								<Button Content="Сохранить" Classes="profile-action"
+										Command="{Binding SaveProfileCommand}"
+										Margin="0 0 10 0"/>
+								<Button Content="Отмена" Classes="profile-action"
+										Command="{Binding CancelEditCommand}"/>
+							</StackPanel>
+						</StackPanel>
 					</StackPanel>
 				</Border>
-
-			
 			</WrapPanel>
 
 			<!-- Статистика портфеля -->
@@ -112,7 +138,7 @@
 					<!-- График активности -->
 					<TextBlock Text="Активность по месяцам" Classes="label" Margin="0 20 0 5"/>
 					<Border Height="200" Background="#FF1E1E1E" CornerRadius="4">
-						<!-- Здесь можно разместить график активности -->
+						<ScottPlot:AvaPlot Name="AvaPlot" Grid.Column="2" Height="200"/>
 					</Border>
 				</StackPanel>
 			</Border>
