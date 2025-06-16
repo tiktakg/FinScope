@@ -43,7 +43,7 @@ namespace FinScope.ViewModels
         public PortfolioViewModel PortfolioViewModel { get; }
         public TransactionsViewModel TransactionsViewModel { get; }
         public NewsViewModel NewsViewModel { get; }
-        //public SettingsViewModel SettingsViewModel { get; }
+        public UserProfileViewModel SettingsViewModel { get; }
 
         public MainWindowViewModel(
             IAuthService authService,
