@@ -32,9 +32,9 @@ namespace FinScope.ViewModels
         {
             News.Clear();
 
-            await LoadMarketauxNewsAsync();
-            await LoadRbcNewsAsync();
-            await LoadVedomostiNewsAsync();
+             LoadMarketauxNewsAsync();
+             LoadRbcNewsAsync();
+             LoadVedomostiNewsAsync();
             await LoadYahooFinanceNewsAsync();
         }
 

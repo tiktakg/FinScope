@@ -116,10 +116,10 @@
 
 				<!-- Нижняя часть меню -->
 				<StackPanel Grid.Row="2" Spacing="5" Margin="10,0,10,20">
-					<!-- 	<Button Command="{Binding NavigateToSettingsCommand}"
+						<Button Command="{Binding NavigateToSettingsCommand}"
 							Content="Профиль"
 							Classes="NavButton"
-							IsEnabled="{Binding IsAuthenticated}"/> -->
+							IsEnabled="{Binding IsAuthenticated}"/> 
 
 
 					<Button Command="{Binding LogoutCommand}"

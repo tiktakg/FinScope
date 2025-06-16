@@ -13,12 +13,13 @@ namespace FinScope.ViewModels
 {
     public partial class RegisterViewModel : ObservableValidator
     {
+        // Добавляем Action для навигации
         // Existing properties remain the same...
         [ObservableProperty]
         [Required(ErrorMessage = "Имя обязательно")]
         private string _firstName = string.Empty;
 
-    
+
 
         [ObservableProperty]
         [Required(ErrorMessage = "Email обязателен")]
@@ -56,7 +57,7 @@ namespace FinScope.ViewModels
         private bool CanRegister() => !IsLoading && AcceptTerms;
 
         [RelayCommand]
-        private  void Register()
+        private void Register()
         {
             ValidateAllProperties();
 
@@ -72,7 +73,7 @@ namespace FinScope.ViewModels
                 return;
             }
 
-      
+
 
             IsLoading = true;
             StatusMessage = "Регистрация...";
@@ -80,7 +81,7 @@ namespace FinScope.ViewModels
             try
             {
                 // Check if email already exists
-                if ( _dbContext.Users.Any(u => u.Email == Email))
+                if (_dbContext.Users.Any(u => u.Email == Email))
                 {
                     StatusMessage = "Этот email уже зарегистрирован";
                     return;
@@ -96,22 +97,17 @@ namespace FinScope.ViewModels
                 };
 
                 // Add to database
-                 _dbContext.Users.Add(newUser);
-                 _dbContext.SaveChanges();
+                _dbContext.Users.Add(newUser);
+                _dbContext.SaveChanges();
 
                 // Authenticate the new user
-                var authResult = _authService.LoginAsync(Email, Password);
+                //var authResult = _authService.LoginAsync(Email, Password);
 
-                if (authResult)
-                {
-                    StatusMessage = "Регистрация успешна!";
-                     _navigationService.NavigateToLogin();
-                }
-                else
-                {
-                    StatusMessage = "Регистрация успешна, но вход не выполнен. Пожалуйста, войдите вручную.";
-                    _navigationService.NavigateToLogin();
-                }
+
+
+                StatusMessage = "Регистрация успешна!";
+                _navigationService.NavigateToLogin();
+
             }
             catch (DbUpdateException ex)
             {
@@ -133,6 +129,7 @@ namespace FinScope.ViewModels
         private void NavigateToLogin()
         {
             _navigationService.NavigateToLogin();
+
         }
         // Rest of the class remains the same...
     }

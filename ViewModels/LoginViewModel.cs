@@ -35,12 +35,8 @@ namespace FinScope.ViewModels
         [ObservableProperty]
         private string _statusMessage = string.Empty;
 
-        // Замените обычное событие на WeakEventManager
-        public event EventHandler LoginSuccess
-        {
-            add => WeakEventManager<LoginViewModel, EventArgs>.AddHandler(this, nameof(LoginSuccess), value);
-            remove => WeakEventManager<LoginViewModel, EventArgs>.RemoveHandler(this, nameof(LoginSuccess), value);
-        }
+        public event EventHandler LoginSuccess;
+        public Action OnLoginSuccess { get; set; }
 
         public bool CanLogin
         {
@@ -86,6 +82,7 @@ namespace FinScope.ViewModels
                 {
                     LoginSuccess?.Invoke(this, EventArgs.Empty);
                     _navigationService.NavigateBack();
+                    OnLoginSuccess?.Invoke();
 
                 }
                 else

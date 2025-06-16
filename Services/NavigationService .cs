@@ -59,13 +59,14 @@ namespace FinScope.Services
 
         public void NavigateToLogin()
         {
-            var vm = new LoginViewModel(_authService, this, _dbContext);
-            var view = new LoginView
-            {
-                DataContext = vm
-            };
+            _mainViewModelLazy.Value.NavigateToLogin();
+            //var vm = new LoginViewModel(_authService, this, _dbContext);
+            //var view = new LoginView
+            //{
+            //    DataContext = vm
+            //};
 
-            _mainViewModelLazy.Value.CurrentView = view;
+            //_mainViewModelLazy.Value.CurrentView = view;
 
         }
 

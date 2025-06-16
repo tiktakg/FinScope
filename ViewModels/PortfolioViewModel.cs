@@ -32,11 +32,21 @@ namespace FinScope.ViewModels
         [ObservableProperty]
         private bool isAddToPortfolioModalVisible;
 
-        [ObservableProperty]
+        //[ObservableProperty]
+        //private int addStockCount;
+
+
         private int addStockCount;
+        public int AddStockCount
+        {
+            get => addStockCount;
+            set => SetProperty(ref addStockCount, value);
+        }
+
 
         [ObservableProperty]
         private ObservableCollection<SectorAllocation> sectorAllocations = new();
+
 
         private PortfolioAsset _selectedAssetForSale;
         public PortfolioAsset SelectedAssetForSale
@@ -45,12 +55,7 @@ namespace FinScope.ViewModels
             set => SetProperty(ref _selectedAssetForSale, value);
         }
 
-        private decimal? _saleStockCount;
-        public decimal? SaleStockCount
-        {
-            get => _saleStockCount;
-            set => SetProperty(ref _saleStockCount, value);
-        }
+   
 
         public string ProfitColor => ProfitPercent >= 0 ? "#FF4CAF50" : "#FFF44336";
         public IRelayCommand ShowAddToPortfolioModalCommand { get; }
@@ -127,14 +132,18 @@ namespace FinScope.ViewModels
 
 
         }
+    
+
+
         [RelayCommand]
         private async void ShowSellStockModal(PortfolioAsset asset)
         {
             if (asset == null) return;
 
+            // Сбрасываем предыдущее состояние
+            AddStockCount = 0;
+            SelectedAssetForSale = asset; // Убедитесь, что это свежий объект из актуального контекста
 
-            SelectedAssetForSale = asset;
-            SaleStockCount = asset.Quantity;
             IsAddToPortfolioModalVisible = true;
         }
 
@@ -149,73 +158,67 @@ namespace FinScope.ViewModels
                 var user = _authService.CurrentUser;
                 if (user == null) return;
 
-                // Проверяем, что не пытаемся продать больше, чем есть
-                if (SaleStockCount > SelectedAssetForSale.Quantity)
+                if (AddStockCount > SelectedAssetForSale.Quantity)
                 {
-                    // Показать сообщение об ошибке
                     // ShowError("Недостаточно акций для продажи");
                     return;
                 }
 
                 using var transaction = await _dbContext.Database.BeginTransactionAsync();
 
+                // Получаем актуальную запись из базы
                 var portfolioAsset = await _dbContext.PortfolioAssets
                     .FirstOrDefaultAsync(a => a.Id == SelectedAssetForSale.Id);
 
-                if (portfolioAsset != null)
+                if (portfolioAsset == null)
                 {
-
-                    decimal totalAmount = AddStockCount * (decimal)portfolioAsset.CurrentPrice;
-
-                    // 1. Обновляем или удаляем запись в портфеле
-                    if (SaleStockCount == portfolioAsset.Quantity)
-                    {
-                        _dbContext.PortfolioAssets.Remove(portfolioAsset);
-                    }
-                    else
-                    {
-                        // Частичная продажа
-                        portfolioAsset.Quantity -= SaleStockCount;
-                        // Пересчитываем показатели
-                        portfolioAsset.Value = portfolioAsset.Quantity * portfolioAsset.CurrentPrice;
-                        portfolioAsset.Profit = (portfolioAsset.CurrentPrice - portfolioAsset.AvgPrice) * portfolioAsset.Quantity;
-                        portfolioAsset.ProfitPercent = (portfolioAsset.CurrentPrice - portfolioAsset.AvgPrice) / portfolioAsset.AvgPrice * 100;
-                    }
-
-                    // 2. Зачисляем средства на счет пользователя
-                    var userAccount = _authService.CurrentUser;
-                        
-
-                    // 3. Создаем запись о транзакции
-                    var transactionRecord = new Transaction
-                    {
-                        UserId = user.Id,
-                        StockId = portfolioAsset.StockId,
-                        Type = "Продажа",
-                        Quantity = AddStockCount,
-                        Price = (decimal)portfolioAsset.CurrentPrice,
-                        Total = totalAmount,
-                        Date = DateTime.UtcNow,
-                    };
-                    await _dbContext.Transactions.AddAsync(transactionRecord);
-
-                    // Сохраняем все изменения
-                    await _dbContext.SaveChangesAsync();
-                    await transaction.CommitAsync();
-
-                    // Закрываем модальное окно
-                    IsAddToPortfolioModalVisible = false;
-
-                    // Обновляем данные портфеля
-                    await LoadDataAsync();
-
-                    // Уведомление об успешной продаже
-                    // ShowNotification($"Успешно продано {SaleStockCount} акций на сумму {totalAmount:C2}");
+                    // ShowError("Актив не найден в портфеле");
+                    return;
                 }
+
+                decimal totalAmount = AddStockCount * (decimal)portfolioAsset.CurrentPrice;
+
+                // 1. Обновляем или удаляем запись в портфеле
+                if (AddStockCount == portfolioAsset.Quantity)
+                {
+                    _dbContext.PortfolioAssets.Remove(portfolioAsset);
+                }
+                else
+                {
+                    portfolioAsset.Quantity -= AddStockCount;
+                    portfolioAsset.Value = portfolioAsset.Quantity * portfolioAsset.CurrentPrice;
+                    portfolioAsset.Profit = (portfolioAsset.CurrentPrice - portfolioAsset.AvgPrice) * portfolioAsset.Quantity;
+                    portfolioAsset.ProfitPercent = (portfolioAsset.CurrentPrice - portfolioAsset.AvgPrice) / portfolioAsset.AvgPrice * 100;
+                }
+
+                // 2. Зачисляем средства на счет пользователя (ваш код)
+
+                // 3. Создаем запись о транзакции
+                var transactionRecord = new Transaction
+                {
+                    UserId = user.Id,
+                    StockId = portfolioAsset.StockId,
+                    Type = "Продажа",
+                    Quantity = AddStockCount,
+                    Price = (decimal)portfolioAsset.CurrentPrice,
+                    Total = totalAmount,
+                    Date = DateTime.UtcNow,
+                };
+                await _dbContext.Transactions.AddAsync(transactionRecord);
+
+                await _dbContext.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                // Сбрасываем состояние
+                IsAddToPortfolioModalVisible = false;
+                SelectedAssetForSale = null; // Важно: очищаем выбранный актив
+                AddStockCount = 0;
+
+                // Обновляем данные
+                await LoadDataAsync();
             }
             catch (Exception ex)
             {
-                // Логирование ошибки
                 // Logger.Error(ex, "Ошибка при продаже акций");
                 // ShowError($"Ошибка при продаже акций: {ex.Message}");
             }

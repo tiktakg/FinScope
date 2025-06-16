@@ -44,7 +44,8 @@ namespace FinScope.ViewModels
         public TransactionsViewModel TransactionsViewModel { get; }
         public NewsViewModel NewsViewModel { get; }
         public UserProfileViewModel SettingsViewModel { get; }
-
+        private readonly RegisterViewModel _registerViewModel
+            ;
         public MainWindowViewModel(
             IAuthService authService,
             INavigationService navigationService,
@@ -57,9 +58,9 @@ namespace FinScope.ViewModels
             PortfolioViewModel portfolioViewModel,
             TransactionsViewModel transactionsViewModel,
             NewsViewModel newsViewModel,
-            UserProfileViewModel settingsViewModel
-            )
-        {
+            UserProfileViewModel settingsViewModel,
+               RegisterViewModel registerViewModel)
+            {
             _authService = authService;
             _marketDataService = marketDataService;
             _navigationService = navigationService;
@@ -75,9 +76,14 @@ namespace FinScope.ViewModels
             CurrentView = new LoginView { DataContext = LoginViewModel };
             // Подписка на событие успешной авторизации
             LoginViewModel.LoginSuccess += OnLoginSuccess;
+            _registerViewModel = registerViewModel;
+            LoginViewModel.OnLoginSuccess = () =>
+            {
+                IsAuthenticated = true;
+                NavigateToDashboard();
+            };
+         
 
-            // Инициализация начального View
-      
         }
 
         private void OnLoginSuccess(object sender, EventArgs e)
@@ -127,6 +133,18 @@ namespace FinScope.ViewModels
         private void NavigateToSettings()
         {
             CurrentView = new UserProfileView();
+        }
+
+
+        [RelayCommand]
+        public void NavigateToLogin()
+        {
+            LoginViewModel.LoginSuccess += OnLoginSuccess;
+
+            CurrentView = new LoginView { DataContext = LoginViewModel };
+            // Подписка на событие успешной авторизации
+            LoginViewModel.LoginSuccess += OnLoginSuccess;
+
         }
 
         [RelayCommand]

@@ -110,11 +110,6 @@
                              Background="Transparent"/>
 				</Border>
 
-				<!-- Чекбокс "Запомнить меня" -->
-				<CheckBox Content="Запомнить меня"
-                          IsChecked="{Binding RememberMe, Mode=TwoWay}"
-                          Foreground="#FFA0A0A0"
-                          Margin="0,0,0,5"/>
 
 				<!-- Сообщение о статусе -->
 				<Border Background="Transparent" CornerRadius="4" Padding="10" Margin="0,0,0,10">
